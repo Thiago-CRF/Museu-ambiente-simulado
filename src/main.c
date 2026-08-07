@@ -1,6 +1,6 @@
 #include <GL/glut.h>
 #include <stdlib.h>
-// gcc main.c -o museu -lGL -lGLU -lglut
+// g++ src/main.c -o museu -lGL -lGLU -lglut
 
 // --- FUNÇÃO DE INICIALIZAÇÃO
 void init(void) {
