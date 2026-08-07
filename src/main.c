@@ -44,26 +44,17 @@ void display(void) {
     glLoadIdentity();
 
     // - CÂMERA
-    // atualmente a camera é estática e olhando pro centro, um pouco de cima
-    gluLookAt(0.0, 2.0, 5.0,   // posição da câmera (X, Y, Z)
-              0.0, 0.0, 0.0,   // para onde a câmera está olhando
-              0.0, 1.0, 0.0);  // qual eixo é o "cima" (Vetor UP)
+    // aplica a vizualização da camera antes de tudo
+    camera_aplicar_visualizacao();
+
+    // ILUMINAÇÃO, atualiaz a posição das luzes
+    iluminacao_atualizar();
 
        // - AMBIENTE / CHÃO
-    glColor3f(0.3, 0.3, 0.3); // define a cor do chão ((0.3, 0.3, 0.3)cinza medio)
-    glBegin(GL_QUADS);
-        glVertex3f(-10.0, 0.0, -10.0);
-        glVertex3f(-10.0, 0.0,  10.0);
-        glVertex3f( 10.0, 0.0,  10.0);
-        glVertex3f( 10.0, 0.0, -10.0);
-    glEnd();
+    cena_desenhar();
 
     // - ACERVO / OBJETOS
-    glPushMatrix(); // salva o estado atual da matriz
-        glTranslatef(0.0, 0.5, 0.0); // sobe o cubo 0.5 em Y para não atravessar o chão
-        glColor3f(0.8, 0.2, 0.2);    // cor do cubo (vermelho)
-        glutSolidCube(1.0);          // desenha o cubo
-    glPopMatrix();  // restaura a matriz, isolando as transformações
+    exponatos_desenhar();
 
     // troca os buffers pra animação
     glutSwapBuffers();
@@ -88,8 +79,8 @@ void reshape(int w, int h) {
     glMatrixMode(GL_MODELVIEW);  // retorna pro modo de visualização
 }
 
-// --- FUNÇÃO DE TECLADO
-void keyboard(unsigned char key, int x, int y) {
+// --- FUNÇÕES DE TECLADO
+void tecla_pressionada(unsigned char key, int x, int y) {
     switch (key) {
         case 27:    // código ASCII pra tecla ESC fechar o programa
             exit(0);  
@@ -101,7 +92,31 @@ void keyboard(unsigned char key, int x, int y) {
         default:
             camera_tecla_pressionada(key);
     }
-    glutPostRedisplay(); // redesenha a janela
+}
+
+void tecla_solta(unsigned char key, int x, int y) {
+    camera_tecla_solta(key);
+}
+
+// -- MOVIMENTAÇÃO DO MOUSE
+void movimento_mouse(int x, int y){
+    camera_processar_mouse(x, y, largura_janela, altura_janela);
+}
+
+// -- LOOP DE ATUALIZAÇÃO (manter 60 fps)
+void atualizar(int valor) {
+    int agora = glutGet(GLUT_ELAPSED_TIME);
+    float dt = (agora - tempo_anterior) / 1000.0f; // converte pra segundos
+    tempo_anterior = agora;
+
+    // trava o dt pra evitar saltos gigantes se a janela ficar suspensa
+    if (dt > 0.1f) 
+        dt = 0.1f;
+
+    camera_atualizar(dt);
+
+    glutPostRedisplay();
+    glutTimerFunc(16, atualizar, 0);
 }
 
 // --- FUNÇÃO MAIN
