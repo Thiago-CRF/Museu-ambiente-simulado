@@ -1,0 +1,14 @@
+museu
+*.out
+*.exe
+
+*.o
+*.obj
+*.a
+*.so
+
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
