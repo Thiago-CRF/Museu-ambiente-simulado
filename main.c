@@ -31,6 +31,13 @@ void display(void) {
         glVertex3f( 10.0, 0.0, -10.0);
     glEnd();
 
+    // - ACERVO / OBJETOS
+    glPushMatrix(); // salva o estado atual da matriz
+        glTranslatef(0.0, 0.5, 0.0); // sobe o cubo 0.5 em Y para não atravessar o chão
+        glColor3f(0.8, 0.2, 0.2);    // cor do cubo (vermelho)
+        glutSolidCube(1.0);          // desenha o cubo
+    glPopMatrix();  // restaura a matriz, isolando as transformações
+
     // troca os buffers pra animação
     glutSwapBuffers();
 }
