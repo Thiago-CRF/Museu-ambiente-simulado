@@ -21,6 +21,18 @@ void display(void) {
     gluLookAt(0.0, 2.0, 5.0,   // posição da câmera (X, Y, Z)
               0.0, 0.0, 0.0,   // para onde a câmera está olhando
               0.0, 1.0, 0.0);  // qual eixo é o "cima" (Vetor UP)
+
+       // - AMBIENTE / CHÃO
+    glColor3f(0.3, 0.3, 0.3); // define a cor do chão ((0.3, 0.3, 0.3)cinza medio)
+    glBegin(GL_QUADS);
+        glVertex3f(-10.0, 0.0, -10.0);
+        glVertex3f(-10.0, 0.0,  10.0);
+        glVertex3f( 10.0, 0.0,  10.0);
+        glVertex3f( 10.0, 0.0, -10.0);
+    glEnd();
+
+    // troca os buffers pra animação
+    glutSwapBuffers();
 }
 
 // --- FUNÇÃO DE REDIMENSIONAMENTO DA JANELA
