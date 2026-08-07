@@ -1,13 +1,40 @@
+// g++ src/main.c -o museu -lGL -lGLU -lglut
 #include <GL/glut.h>
 #include <stdlib.h>
-// g++ src/main.c -o museu -lGL -lGLU -lglut
+
+#include "common.h"
+#include "camera.h"
+#include "cena.h"
+#include "exibicoes.h"
+#include "iluminacao.h"
+
+// dimensoes atuais da janela que são atulizadas no reshape
+static int largura_janela = LARGURA_JANELA;
+static int altura_janela = ALTURA_JANELA;
+
+// tempo do frame anterior em milissegundos pra calcular o delta tempo dt
+static int tempo_anterior = 0;
 
 // --- FUNÇÃO DE INICIALIZAÇÃO
 void init(void) {
-    // define a cor de fundo da janela ((0.1, 0.1, 0.1, 1.0)cinza escuro)
+    // cor de fundo da janela ((0.1, 0.1, 0.1, 1.0)cinza escuro)
     glClearColor(0.1, 0.1, 0.1, 1.0); 
     
     glEnable(GL_DEPTH_TEST); // ativa o z-buffer
+    glShadeModel(GL_SMOOTH); // sombreamento suave
+    glEnable(GL_NORMALIZE); // normaliza normais apos glScalef
+
+    // inicia cada modulo
+    cena_iniciar();
+    exponatos_iniciar();
+    iluminacao_iniciar();
+    camera_iniciar();
+
+    // esconde o cursor e centraliza o mouse pro modo primeira pessoa
+    glutSetCursor(GLUT_CURSOR_NONE);
+    glutWarpPointer(largura_janela / 2, altura_janela / 2);
+
+    tempo_anterior = glutGet(GLUT_ELAPSED_TIME);
 }
 
 // --- FUNÇÃO DE DESENHO (DISPLAY)
@@ -46,7 +73,10 @@ void display(void) {
 void reshape(int w, int h) {
     // não deixa dividir por 0 se a janela for muito pequena
     if (h == 0) h = 1; 
-    float ratio = w * 1.0 / h;
+    largura_janela = w;
+    altura_janela = h;
+
+    float ratio = (float)w / (float)h;
 
     glMatrixMode(GL_PROJECTION); // entra no modo de projeção
     glLoadIdentity();
@@ -64,6 +94,12 @@ void keyboard(unsigned char key, int x, int y) {
         case 27:    // código ASCII pra tecla ESC fechar o programa
             exit(0);  
             break;
+        case 't':
+        case 'T':
+            camera_alternar_modo();
+            break;
+        default:
+            camera_tecla_pressionada(key);
     }
     glutPostRedisplay(); // redesenha a janela
 }
