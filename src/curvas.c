@@ -1,3 +1,4 @@
+#include <GL/gl.h>
 #include "curvas.h"
 
 // avalia para ver se a curva de bezier cubica é valida
@@ -23,3 +24,26 @@ Vetor3 curva_avaliar(CurvaBezier curva, float t) {
     return ponto;
 }
 
+void curva_desenhar(CurvaBezier curva, int num_segmentos) {
+    // empacota os pontos de controle no layout contiguo que o glMap1f espera
+    GLfloat pontos_controle[4][3] = {
+        {curva.p0.x, curva.p0.y, curva.p0.z},
+        {curva.p1.x, curva.p1.y, curva.p1.z},
+        {curva.p2.x, curva.p2.y, curva.p2.z},
+        {curva.p3.x, curva.p3.y, curva.p3.z}
+    };
+
+    // mapeia pra desnehar a curva
+    glMap1f(GL_MAP1_VERTEX_3, 0.0f, 1.0f, 3, 4, &pontos_controle[0][0]);
+    glEnable(GL_MAP1_VERTEX_3);
+
+    // gera os vertices da curva pra conectar os segmentos
+    glBegin(GL_LINE_STRIP);
+    for(int i = 0; i <= num_segmentos; i++){
+        glEvalCoord1f((float)i / (float)num_segmentos);
+    }
+    glEnd();
+    
+    // desativa o evaluator no fim pra não mexer no estado do opengl
+    glDisable(GL_MAP1_VERTEX_3);
+}
