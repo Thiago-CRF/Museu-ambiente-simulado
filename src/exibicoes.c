@@ -118,6 +118,92 @@ static void desenhar_estatua(Estatua e) {
     glPopMatrix();
 }
 
+void desenhar_estatua_T_pose(float x, float y, float z, float altura_total) {
+    float alt_pedestal = altura_total * 0.05f; // 5%
+    float alt_pernas    = altura_total * 0.50f; // 50%
+    float alt_tronco    = altura_total * 0.30f; // 30%
+    float diam_cabeca   = altura_total * 0.15f; // 15% restante
+    float raio_cabeca   = diam_cabeca / 2.0f;
+
+    // Configuração dos cilindros das pernas
+    float raio_cilindro = 0.12f;
+    float diam_cilindro = raio_cilindro * 2.0f;
+    // Configuração dos cilindros dos braços
+    float compr_braco   = altura_total * 0.35f;
+    float raio_braco    = 0.08f;
+    
+    // O retângulo (tronco) terá largura igual à soma dos dois diâmetros
+    float largura_retangulo = diam_cilindro * 2.0f; 
+
+    // Inicializa o objeto quádrico da GLU para cilindros e esferas
+    GLUquadric* q = gluNewQuadric();
+
+    glPushMatrix();
+        glTranslatef(x, y, z);
+
+        // Criando um pedestal baixo
+        glColor3f(0.9f, 0.9f, 0.9f); // um branco um pouco mais escuro
+        glPushMatrix();
+            glTranslatef(0.0f, alt_pedestal / 2.0f, 0.0f);
+            glScalef(largura_retangulo * 1.5f, alt_pedestal, largura_retangulo * 1.5f);
+            glutSolidCube(1.0);
+        glPopMatrix();
+
+        glTranslatef(0.0f, alt_pedestal, 0.0f);
+        
+        // A criação dos cilindros das pernas
+        glColor3f(0.3f, 0.4f, 0.6f); // azul
+        glPushMatrix();
+            glTranslatef(-raio_cilindro, 0.0f, 0.0f);
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f); 
+            gluCylinder(q, raio_cilindro, raio_cilindro, alt_pernas, 32, 1);
+        glPopMatrix();
+
+        glPushMatrix();
+            glTranslatef(raio_cilindro, 0.0f, 0.0f);
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f); 
+            gluCylinder(q, raio_cilindro, raio_cilindro, alt_pernas, 32, 1);
+        glPopMatrix();
+
+        glTranslatef(0.0f, alt_pernas, 0.0f);
+
+        // Desenhando o retangulo do tronco
+        glColor3f(0.3f, 0.4f, 0.6f);
+        glPushMatrix();
+            glTranslatef(0.0f, alt_tronco / 2.0f, 0.0f);
+            glScalef(largura_retangulo, alt_tronco, diam_cilindro); 
+            glutSolidCube(1.0);
+        glPopMatrix();
+
+        glTranslatef(0.0f, alt_tronco, 0.0f);
+
+        // Desenhando os cilindros dos braços
+        glColor3f(0.3f, 0.4f, 0.6f);
+        glPushMatrix();
+            glTranslatef(largura_retangulo / 2.0f, -raio_braco, 0.0f);
+            glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
+            gluCylinder(q, raio_braco, raio_braco, compr_braco, 32, 1);
+        glPopMatrix();
+
+
+        glPushMatrix();
+            glTranslatef(-largura_retangulo / 2.0f, -raio_braco, 0.0f);
+            glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+            gluCylinder(q, raio_braco, raio_braco, compr_braco, 32, 1);
+        glPopMatrix();
+
+        // Desenhando a esfere que representa a cabeça
+        glColor3f(0.3f, 0.4f, 0.6f);
+        glPushMatrix();
+            glTranslatef(0.0f, raio_cabeca, 0.0f);
+            glutSolidSphere(raio_cabeca, 32, 32);
+        glPopMatrix();
+
+    glPopMatrix();
+    
+    gluDeleteQuadric(q);
+}
+
 // desenha um quadro com moldura encostado na parede
 static void desenhar_quadro(Quadro q) {
     glPushMatrix();
@@ -159,9 +245,11 @@ static void desenhar_quadro(Quadro q) {
 }
 
 void exponatos_desenhar(void) {
-    for (int i = 0; i < NUM_ESTATUAS; i++) {
+    for (int i = 0; i < NUM_ESTATUAS-1; i++) {
         desenhar_estatua(estatuas[i]);
     }
+
+    desenhar_estatua_T_pose(estatuas[3].posicao.x, estatuas[3].posicao.y, estatuas[3].posicao.z, 2.0f);
 
     for (int i = 0; i < NUM_QUADROS; i++) {
         desenhar_quadro(quadros[i]);
