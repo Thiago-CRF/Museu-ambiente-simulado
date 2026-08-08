@@ -10,7 +10,7 @@ static GLuint texturaTeto = 0;
 
 void cena_iniciar(void) {
     texturaPiso = textura_carregar("assets/textures/piso.jpg");
-    texturaParede = textura_carregar("assets/textures/parede.jpg");
+    texturaParede = textura_carregar("assets/textures/parede.jpg");             // pego em: https://www.poliigon.com/pt-br/texture/smooth-troweled-microcement-texture-cool-grey/8690
     texturaTeto = textura_carregar("assets/textures/teto.jpg");
 }
 

@@ -5,6 +5,7 @@
 
 #define NUM_ESTATUAS 4
 #define NUM_QUADROS  7
+#define ALTURA_DA_ESTATUA 3.0f
 
 typedef struct {
     Vetor3 posicao;
@@ -247,7 +248,7 @@ void exponatos_desenhar(void) {
         desenhar_estatua(estatuas[i]);
     }
 
-    desenhar_estatua_T_pose(estatuas[3].posicao.x, estatuas[3].posicao.y, estatuas[3].posicao.z, 2.0f);
+    desenhar_estatua_T_pose(estatuas[3].posicao.x, estatuas[3].posicao.y, estatuas[3].posicao.z, ALTURA_DA_ESTATUA);
 
     for (int i = 0; i < NUM_QUADROS; i++) {
         desenhar_quadro(quadros[i]);
