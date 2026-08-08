@@ -31,3 +31,13 @@ static void montar_caminho_tour(void) {
     caminho_tour[2] = (CurvaBezier){{-r, y, 0}, {-r, y,-k}, {-k, y,-r}, { 0, y,-r}};
     caminho_tour[3] = (CurvaBezier){{ 0, y,-r}, { k, y,-r}, { r, y,-k}, { r, y, 0}};
 }
+
+// calcula o vetor de direcao a partir dos angulos da camera
+static void direcao_camera(float *dx, float *dy, float *dz) {
+    float radYaw = cam.yaw * M_PI / 180.0f; // M_PI da biblioteca math
+    float radPitch = cam.pitch * M_PI / 180.0f;
+
+    *dx = cosf(radYaw) * cosf(radPitch);
+    *dy = sinf(radPitch);
+    *dz = sinf(radYaw) * cosf(radPitch);
+}
