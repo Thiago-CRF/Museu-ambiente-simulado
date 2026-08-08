@@ -124,7 +124,7 @@ int main(int argc, char** argv) {
     // inicialização do GLUT
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(800, 600); // tamanho inicial da janela
+    glutInitWindowSize(LARGURA_JANELA, ALTURA_JANELA); // tamanho inicial da janela
     glutCreateWindow("Projeto CG - Museu Virtual");
 
     init();
@@ -132,7 +132,11 @@ int main(int argc, char** argv) {
     // registro dos callbacks
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
-    glutKeyboardFunc(keyboard);
+    glutKeyboardFunc(tecla_pressionada);
+    glutKeyboardUpFunc(tecla_solta);
+    glutPassiveMotionFunc(movimento_mouse);
+
+    glutTimerFunc(16, atualizar, 0);
 
     // entra no loop infinito do OpenGL
     glutMainLoop();
