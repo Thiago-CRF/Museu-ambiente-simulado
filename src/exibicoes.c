@@ -15,11 +15,11 @@ typedef struct {
     Vetor3 posicao;   // centro do quadro na parede
     float rotacaoY;   // giro pra encostar o quadro na parede certa
     float largura, altura;
+    GLuint texturaQuadro;
 } Quadro;
 
 static Estatua estatuas[NUM_ESTATUAS];
 static Quadro quadros[NUM_QUADROS];
-static GLuint texturaQuadro = 0;
 
 void exponatos_iniciar(void) {
     // ==========================================
@@ -36,21 +36,22 @@ void exponatos_iniciar(void) {
     // Centro da sala é em X = 15.0
     // ==========================================
     // Quadro 1: Parede do fundo (-Z)
-    quadros[0] = (Quadro){ {  15.0f, 3.0f, -9.9f },   0.0f, 3.0f, 2.0f };
+    quadros[0] = (Quadro){ {  15.0f, 3.0f, -9.9f },   0.0f, 3.0f, 2.0f,
+                            textura_carregar("assets/textures/Tito_Lobo.jpg") };
     
     // Quadro 2: Parede da frente (+Z)
-    quadros[1] = (Quadro){ {  15.0f, 3.0f,  9.9f }, 180.0f, 3.0f, 2.0f };
+    quadros[1] = (Quadro){ {  15.0f, 3.0f,  9.9f }, 180.0f, 3.0f, 2.0f,
+                            textura_carregar("assets/textures/Vangogh.jpg") };
     
     // Quadro 3: Parede da direita (+X), que é totalmente fechada
-    quadros[2] = (Quadro){ {  24.9f, 3.0f,  0.0f }, -90.0f, 3.0f, 2.0f };
+    quadros[2] = (Quadro){ {  24.9f, 3.0f,  0.0f }, -90.0f, 3.0f, 2.0f,
+                            textura_carregar("assets/textures/Salvador_Dali.jpg") };
     
     // Quadro 4: Parede da esquerda (-X)
     // Como o corredor fica no meio (Z de -3 a 3), vamos colocar este quadro
     // no pilar que fica na parte de trás da parede (Z = -6.5).
-    quadros[3] = (Quadro){ {   5.1f, 3.0f, -6.5f },  90.0f, 3.0f, 2.0f };
-
-    // Tenta carregar a textura. Se o arquivo não existir ou o texture.h não estiver pronto, ele retorna 0 em segurança
-    texturaQuadro = textura_carregar("assets/textures/quadro.jpg");
+    quadros[3] = (Quadro){ {   5.1f, 3.0f, -6.5f },  90.0f, 3.0f, 2.0f,
+                            textura_carregar("assets/textures/Mona_Lisa.PNG") };
 }
 
 // desenha um pedestal simples na origem local
@@ -126,9 +127,9 @@ static void desenhar_quadro(Quadro q) {
         
         // tela do quadro
         glColor3f(1.0f, 1.0f, 1.0f);
-        if (texturaQuadro != 0) {
+        if (q.texturaQuadro != 0) {
             glEnable(GL_TEXTURE_2D);
-            glBindTexture(GL_TEXTURE_2D, texturaQuadro);
+            glBindTexture(GL_TEXTURE_2D, q.texturaQuadro);
             glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
         }
 
@@ -140,7 +141,7 @@ static void desenhar_quadro(Quadro q) {
             glTexCoord2f(0.0f, 1.0f); glVertex3f(-meiaL,  meiaA, 0.06f);
         glEnd();
 
-        if (texturaQuadro != 0) {
+        if (q.texturaQuadro != 0) {
             glDisable(GL_TEXTURE_2D);
         }
     glPopMatrix();
