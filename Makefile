@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Isrc -Iexternal
+CFLAGS = -Wall -Wextra -O2 -Isrc -Iexternal
 LDFLAGS = -lGL -lGLU -lglut -lm
 ALVO = museu
 
