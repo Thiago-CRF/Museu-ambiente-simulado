@@ -27,5 +27,26 @@ void iluminacao_iniciar(){
     glEnable(GL_LIGHT0);
 
     // luz 1: spot quente sobre estatuas no fundo (apenas base, mudar quando mudar as posições)
+    GLfloat luz1_difusa[]    = { 1.0f, 0.9f, 0.7f, 1.0f };
+    GLfloat luz1_especular[] = { 1.0f, 1.0f, 0.9f, 1.0f };
 
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, luz1_difusa);
+    glLightfv(GL_LIGHT1, GL_SPECULAR, luz1_especular);
+    glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 35.0f);
+    glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 8.0f);
+    glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 1.0f);
+    glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.05f);
+    glEnable(GL_LIGHT1);
+
+    // luz 2: spot frio sobre estatuas da frente (tambem apenas exemplo base, mudar quando mudar os itens do museu)
+    GLfloat luz2_difusa[]    = { 0.7f, 0.8f, 1.0f, 1.0f };
+    GLfloat luz2_especular[] = { 0.9f, 0.9f, 1.0f, 1.0f };
+
+    glLightfv(GL_LIGHT2, GL_DIFFUSE, luz2_difusa);
+    glLightfv(GL_LIGHT2, GL_SPECULAR, luz2_especular);
+    glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 35.0f);
+    glLightf(GL_LIGHT2, GL_SPOT_EXPONENT, 8.0f);
+    glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 1.0f);
+    glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 0.05f);
+    glEnable(GL_LIGHT2);
 }
