@@ -11,6 +11,28 @@
 
 #define NUM_TRECHOS 4
 
+// struct com os valores das regioes navegaveis do museu, plano XZ
+typedef struct {
+    float xmin, xmax, zmin, zmax;
+} RegiaoNavegavel;
+
+#define NUM_REGIOES 3   // 3 pois tem duas salas e um corredor
+
+static const RegiaoNavegavel regioes[NUM_REGIOES] = {
+    // sala 1, encolhida pela margem pra camera nao encostar na parede
+    { S1_XMIN + MARGEM_COLISAO, S1_XMAX - MARGEM_COLISAO,
+      S1_ZMIN + MARGEM_COLISAO, S1_ZMAX - MARGEM_COLISAO },
+
+    // corredor: avanca 1 unidade pra dentro das duas salas pras
+    // portas nao ficarem bloqueadas pela margem das regioes vizinhas
+    { C_XMIN - 1.0f, C_XMAX + 1.0f,
+      C_ZMIN + MARGEM_COLISAO, C_ZMAX - MARGEM_COLISAO },
+
+    // sala 2
+    { S2_XMIN + MARGEM_COLISAO, S2_XMAX - MARGEM_COLISAO,
+      S2_ZMIN + MARGEM_COLISAO, S2_ZMAX - MARGEM_COLISAO }
+};
+
 static Camera cam;
 static int teclas[256]; // estado das teclas (1: pressionada)
 static int ignorar_prox_mouse = 0; // evita loop quando recentraliza o cursor
@@ -19,6 +41,17 @@ static int ignorar_prox_mouse = 0; // evita loop quando recentraliza o cursor
 static CurvaBezier caminho_tour[NUM_TRECHOS];
 static int trecho_atual = 0;
 static float t_atual = 0.0f;
+
+// verifica se a posição esta dentro de alguma regiao navegavel
+static int posicao_valida(float x, float z) {
+    for (int i = 0; i < NUM_REGIOES; i++) {
+        if (x >= regioes[i].xmin && x <= regioes[i].xmax &&
+            z >= regioes[i].zmin && z <= regioes[i].zmax) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 // monta os pontos de controle do circuito do tour
 static void montar_caminho_tour(void) {
