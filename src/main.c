@@ -1,13 +1,40 @@
+// g++ src/main.c -o museu -lGL -lGLU -lglut
 #include <GL/glut.h>
 #include <stdlib.h>
-// g++ src/main.c -o museu -lGL -lGLU -lglut
+#include "cena.h"
+#include "common.h"
+#include "camera.h"
+#include "cena.h"
+#include "exibicoes.h"
+#include "iluminacao.h"
+
+// dimensoes atuais da janela que são atulizadas no reshape
+static int largura_janela = LARGURA_JANELA;
+static int altura_janela = ALTURA_JANELA;
+
+// tempo do frame anterior em milissegundos pra calcular o delta tempo dt
+static int tempo_anterior = 0;
 
 // --- FUNÇÃO DE INICIALIZAÇÃO
 void init(void) {
-    // define a cor de fundo da janela ((0.1, 0.1, 0.1, 1.0)cinza escuro)
+    // cor de fundo da janela ((0.1, 0.1, 0.1, 1.0)cinza escuro)
     glClearColor(0.1, 0.1, 0.1, 1.0); 
     
     glEnable(GL_DEPTH_TEST); // ativa o z-buffer
+    glShadeModel(GL_SMOOTH); // sombreamento suave
+    glEnable(GL_NORMALIZE); // normaliza normais apos glScalef
+
+    // inicia cada modulo
+    cena_iniciar();
+    exponatos_iniciar();
+    iluminacao_iniciar();
+    camera_iniciar();
+
+    // esconde o cursor e centraliza o mouse pro modo primeira pessoa
+    glutSetCursor(GLUT_CURSOR_NONE);
+    glutWarpPointer(largura_janela / 2, altura_janela / 2);
+
+    tempo_anterior = glutGet(GLUT_ELAPSED_TIME);
 }
 
 // --- FUNÇÃO DE DESENHO (DISPLAY)
@@ -17,26 +44,17 @@ void display(void) {
     glLoadIdentity();
 
     // - CÂMERA
-    // atualmente a camera é estática e olhando pro centro, um pouco de cima
-    gluLookAt(0.0, 2.0, 5.0,   // posição da câmera (X, Y, Z)
-              0.0, 0.0, 0.0,   // para onde a câmera está olhando
-              0.0, 1.0, 0.0);  // qual eixo é o "cima" (Vetor UP)
+    // aplica a vizualização da camera antes de tudo
+    camera_aplicar_visualizacao();
+
+    // ILUMINAÇÃO, atualiaz a posição das luzes
+    iluminacao_atualizar();
 
        // - AMBIENTE / CHÃO
-    glColor3f(0.3, 0.3, 0.3); // define a cor do chão ((0.3, 0.3, 0.3)cinza medio)
-    glBegin(GL_QUADS);
-        glVertex3f(-10.0, 0.0, -10.0);
-        glVertex3f(-10.0, 0.0,  10.0);
-        glVertex3f( 10.0, 0.0,  10.0);
-        glVertex3f( 10.0, 0.0, -10.0);
-    glEnd();
+    cena_desenhar();
 
     // - ACERVO / OBJETOS
-    glPushMatrix(); // salva o estado atual da matriz
-        glTranslatef(0.0, 0.5, 0.0); // sobe o cubo 0.5 em Y para não atravessar o chão
-        glColor3f(0.8, 0.2, 0.2);    // cor do cubo (vermelho)
-        glutSolidCube(1.0);          // desenha o cubo
-    glPopMatrix();  // restaura a matriz, isolando as transformações
+    exponatos_desenhar();
 
     // troca os buffers pra animação
     glutSwapBuffers();
@@ -46,7 +64,10 @@ void display(void) {
 void reshape(int w, int h) {
     // não deixa dividir por 0 se a janela for muito pequena
     if (h == 0) h = 1; 
-    float ratio = w * 1.0 / h;
+    largura_janela = w;
+    altura_janela = h;
+
+    float ratio = (float)w / (float)h;
 
     glMatrixMode(GL_PROJECTION); // entra no modo de projeção
     glLoadIdentity();
@@ -58,14 +79,44 @@ void reshape(int w, int h) {
     glMatrixMode(GL_MODELVIEW);  // retorna pro modo de visualização
 }
 
-// --- FUNÇÃO DE TECLADO
-void keyboard(unsigned char key, int x, int y) {
+// --- FUNÇÕES DE TECLADO
+void tecla_pressionada(unsigned char key, int x, int y) {
     switch (key) {
         case 27:    // código ASCII pra tecla ESC fechar o programa
             exit(0);  
             break;
+        case 't':
+        case 'T':
+            camera_alternar_modo();
+            break;
+        default:
+            camera_tecla_pressionada(key);
     }
-    glutPostRedisplay(); // redesenha a janela
+}
+
+void tecla_solta(unsigned char key, int x, int y) {
+    camera_tecla_solta(key);
+}
+
+// -- MOVIMENTAÇÃO DO MOUSE
+void movimento_mouse(int x, int y){
+    camera_processar_mouse(x, y, largura_janela, altura_janela);
+}
+
+// -- LOOP DE ATUALIZAÇÃO (manter 60 fps)
+void atualizar(int valor) {
+    int agora = glutGet(GLUT_ELAPSED_TIME);
+    float dt = (agora - tempo_anterior) / 1000.0f; // converte pra segundos
+    tempo_anterior = agora;
+
+    // trava o dt pra evitar saltos gigantes se a janela ficar suspensa
+    if (dt > 0.1f) 
+        dt = 0.1f;
+
+    camera_atualizar(dt);
+
+    glutPostRedisplay();
+    glutTimerFunc(16, atualizar, 0);
 }
 
 // --- FUNÇÃO MAIN
@@ -73,7 +124,7 @@ int main(int argc, char** argv) {
     // inicialização do GLUT
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(800, 600); // tamanho inicial da janela
+    glutInitWindowSize(LARGURA_JANELA, ALTURA_JANELA); // tamanho inicial da janela
     glutCreateWindow("Projeto CG - Museu Virtual");
 
     init();
@@ -81,7 +132,11 @@ int main(int argc, char** argv) {
     // registro dos callbacks
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
-    glutKeyboardFunc(keyboard);
+    glutKeyboardFunc(tecla_pressionada);
+    glutKeyboardUpFunc(tecla_solta);
+    glutPassiveMotionFunc(movimento_mouse);
+
+    glutTimerFunc(16, atualizar, 0);
 
     // entra no loop infinito do OpenGL
     glutMainLoop();
