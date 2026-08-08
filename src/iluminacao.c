@@ -44,6 +44,44 @@ static void montar_luzes(void) {
     luzes[8] = (LuzMuseu){ {15.0f, 6.0f, 0.0f}, {0.0f, -1.0f, 0.0f}, 0, AMBIENTE_SALA2 };
 }
 
+// joga os parametros de uma luz do museu num slot do opengl
+// todos os parametros sao setados aqui e nao no iniciar, porque o mesmo slot
+// pode ser um spot de estatua num frame e um spot de corredor no seguinte
+static void aplicar_luz(GLenum slot, LuzMuseu luz) {
+    // o w = 1.0 no fim indica que a luz é posicional, e nao direcional
+    GLfloat posicao[] = { luz.posicao.x, luz.posicao.y, luz.posicao.z, 1.0f };
+    glLightfv(slot, GL_POSITION, posicao);
+
+    if (luz.e_spot) {
+        // luz quente dos holofotes
+        GLfloat difusa[]    = { 1.00f, 0.85f, 0.60f, 1.0f };
+        GLfloat especular[] = { 1.00f, 0.95f, 0.85f, 1.0f };
+        GLfloat direcao[]   = { luz.direcao.x, luz.direcao.y, luz.direcao.z };
+
+        glLightfv(slot, GL_DIFFUSE, difusa);
+        glLightfv(slot, GL_SPECULAR, especular);
+        glLightfv(slot, GL_SPOT_DIRECTION, direcao);
+        glLightf(slot, GL_SPOT_CUTOFF, 30.0f);  // abertura do cone em graus
+        glLightf(slot, GL_SPOT_EXPONENT, 10.0f); // concentracao no centro do cone
+        glLightf(slot, GL_CONSTANT_ATTENUATION, 1.0f);
+        glLightf(slot, GL_LINEAR_ATTENUATION, 0.08f);
+    }
+    else {
+        // lustre: luz pontual, quente mas mais fraca e espalhada
+        GLfloat difusa[]    = { 0.90f, 0.85f, 0.72f, 1.0f };
+        GLfloat especular[] = { 0.40f, 0.40f, 0.35f, 1.0f };
+
+        glLightfv(slot, GL_DIFFUSE, difusa);
+        glLightfv(slot, GL_SPECULAR, especular);
+        glLightf(slot, GL_SPOT_CUTOFF, 180.0f);  // 180 desliga o cone e vira pontual
+        glLightf(slot, GL_SPOT_EXPONENT, 0.0f);
+        glLightf(slot, GL_CONSTANT_ATTENUATION, 1.0f);
+        glLightf(slot, GL_LINEAR_ATTENUATION, 0.02f);
+    }
+
+    glEnable(slot);
+}
+
 
 
 static LuzMuseu luzes[NUM_LUZES_MUSEU];
