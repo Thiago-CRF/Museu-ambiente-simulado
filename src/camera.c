@@ -223,7 +223,7 @@ static void atualizar_modo_livre(float dt) {
 static void atualizar_modo_tour(float dt) {
     t_atual += VELOCIDADE_TOUR * dt;
 
-    // qauando terminar um trecho, passa pro proximo (voltando ao inicio no fim)
+    // quaando terminar um trecho, passa pro proximo (voltando ao inicio no fim)
     while (t_atual >= 1.0f) {
         t_atual -= 1.0f;
         trecho_atual = (trecho_atual + 1) % NUM_TRECHOS;
@@ -231,19 +231,36 @@ static void atualizar_modo_tour(float dt) {
 
     Vetor3 posicao = curva_avaliar(caminho_tour[trecho_atual], t_atual);
 
-    // calcula um ponto um pouco a frente pra saber pra onde olhar
-    float t_frente = t_atual + 0.02f;
-    int trecho_frente = trecho_atual;
-    if (t_frente >= 1.0f) {
-        t_frente -= 1.0f;
-        trecho_frente = (trecho_atual + 1) % NUM_TRECHOS;
-    }
-
-    Vetor3 alvo = curva_avaliar(caminho_tour[trecho_frente], t_frente);
-
     cam.x = posicao.x;
     cam.y = posicao.y;
     cam.z = posicao.z;
+
+    // muda o alvo do ponto atual pro proximo ponto ao longo do caminho
+    int seguinte = (trecho_atual + 1) % NUM_TRECHOS;
+    Vetor3 alvo_ini = pontos_tour[trecho_atual].alvo;
+    Vetor3 alvo_fim = pontos_tour[seguinte].alvo;
+
+    // faz o giro começar e terminar devagar em vez de a mesma velocidade
+    float smooth = t_atual * t_atual * (3.0f - 2.0f * t_atual);
+
+    Vetor3 alvo;
+    alvo.x = alvo_ini.x + (alvo_fim.x - alvo_ini.x) * smooth;
+    alvo.y = alvo_ini.y + (alvo_fim.y - alvo_ini.y) * smooth;
+    alvo.z = alvo_ini.z + (alvo_fim.z - alvo_ini.z) * smooth;
+
+    // converte a direcao ate o alvo nos angulos que a camera usa
+    // comprimento é a distancia entre a camera e o alvo
+    float dx = alvo.x - cam.x;
+    float dy = alvo.y - cam.y;
+    float dz = alvo.z - cam.z;
+    float comprimento = sqrtf(dx * dx + dy * dy + dz * dz);
+
+    // define yaw e pitch com base no comprimento, normalizando os valores com o comprimento
+    // ignora valores muito próximos de 0
+    if (comprimento > 0.0001f) {
+        cam.yaw = atan2f(dz, dx) * 180.0f / M_PI;
+        cam.pitch = asinf(dy / comprimento) * 180.0f / M_PI;
+    }
 }
 
 void camera_atualizar(float dt){
