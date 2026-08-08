@@ -50,3 +50,23 @@ void iluminacao_iniciar(){
     glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 0.05f);
     glEnable(GL_LIGHT2);
 }
+
+void iluminacao_atualizar(){
+    // as posições sao definidas todo frame porque depende da matriz modelview
+    // precisa chamar depois de camera_aplicar_visualizacao()
+
+    // modificar as posições base e adicionar para cada ponto de luz novo
+
+    GLfloat posicao_luz0[] = { 0.0f, 5.5f, 0.0f, 1.0f };
+    glLightfv(GL_LIGHT0, GL_POSITION, posicao_luz0);
+
+    GLfloat posicao_luz1[]  = { 0.0f, 5.5f, -4.0f, 1.0f };
+    GLfloat direcao_luz1[]  = { 0.0f, -1.0f, 0.0f };
+    glLightfv(GL_LIGHT1, GL_POSITION, posicao_luz1);
+    glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, direcao_luz1);
+
+    GLfloat posicao_luz2[]  = { 0.0f, 5.5f, 4.0f, 1.0f };
+    GLfloat direcao_luz2[]  = { 0.0f, -1.0f, 0.0f };
+    glLightfv(GL_LIGHT2, GL_POSITION, posicao_luz2);
+    glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, direcao_luz2);
+}
