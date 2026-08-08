@@ -4,7 +4,7 @@
 #include "texture.h"
 
 #define NUM_ESTATUAS 4
-#define NUM_QUADROS  5
+#define NUM_QUADROS  7
 
 typedef struct {
     Vetor3 posicao;
@@ -45,17 +45,23 @@ void exponatos_iniciar(void) {
     // Sofre do mesmo problema que o quadro 1
     quadros[1] = (Quadro){ {   5.1f, 3.0f,   6.5f }, 90.0f,  2.94f,  3.78f,
                         textura_carregar("assets/textures/Salvador_Dali2.jpg") };
+
+    // Quadro 3, 4 e 5: Parede da frente (+Z)
+    quadros[2] = (Quadro){ { 10.0f, 3.0f,  9.9f }, 180.0f, 3.02f, 3.78f,
+                        textura_carregar("assets/textures/Os_Girassois.jpg") };
     
-    // Quadro 3: Parede da frente (+Z)
-    quadros[2] = (Quadro){ {  15.0f, 3.0f,  9.9f }, 180.0f, 3.0f, 3.78f,
-                        textura_carregar("assets/textures/Vangogh.jpg") };
+    quadros[3] = (Quadro){ { 15.0f, 3.0f,  9.9f }, 180.0f, 3.11f, 3.78f,
+                        textura_carregar("assets/textures/Van_Gogh.jpg") };
+
+    quadros[4] = (Quadro){ { 20.5f, 3.0f,  9.9f }, 180.0f, 4.77f, 3.78f,
+                        textura_carregar("assets/textures/Noite_Estrelada.jpg") };
     
-    // Quadro 4: Parede da direita (+X), que é totalmente fechada
-    quadros[3] = (Quadro){ {  24.9f, 3.0f,  0.0f }, -90.0f, 6.54f, 4.36f,
+    // Quadro 6: Parede da direita (+X), que é totalmente fechada
+    quadros[5] = (Quadro){ {  24.9f, 3.0f,  0.0f }, -90.0f, 6.54f, 4.36f,
                         textura_carregar("assets/textures/Tito_Lobo.jpg") };
     
-    // Quadro 5: Parede do fundo (-Z)
-    quadros[4] = (Quadro){ {  15.0f, 3.0f, -9.9f },   0.0f, 3.0f, 4.36f,
+    // Quadro 7: Parede do fundo (-Z)
+    quadros[6] = (Quadro){ {  15.0f, 3.0f, -9.9f },   0.0f, 3.0f, 4.36f,
                         textura_carregar("assets/textures/Mona_Lisa.PNG") };
 }
 
