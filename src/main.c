@@ -1,7 +1,7 @@
 // g++ src/main.c -o museu -lGL -lGLU -lglut
 #include <GL/glut.h>
 #include <stdlib.h>
-
+#include "cena.h"
 #include "common.h"
 #include "camera.h"
 #include "cena.h"

@@ -1,12 +1,10 @@
-// para listar desenhar e lidar com os itens da exposição
-
 #ifndef MUSEU_EXIBICOES_H
 #define MUSEU_EXIBICOES_H
 
-// inicia dados dos itens de exibiçoes (posições, cores, materiais)
+// Inicializa dados dos exponatos (posições, cores, etc)
 void exponatos_iniciar(void);
 
-// desenha todos os itens de exibiçoes da cena
+// Desenha todos os exponatos da cena (estátuas e quadros)
 void exponatos_desenhar(void);
 
-#endif
+#endif // MUSEU_EXIBICOES_H
