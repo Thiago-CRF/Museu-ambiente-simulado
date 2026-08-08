@@ -22,17 +22,32 @@ static Quadro quadros[NUM_QUADROS];
 static GLuint texturaQuadro = 0;
 
 void exponatos_iniciar(void) {
-    // estatuas sobre pedestais, espalhadas pela sala
-    estatuas[0] = (Estatua){ { -4.0f, 0.0f, -4.0f }, 0.80f, 0.75f, 0.65f };
-    estatuas[1] = (Estatua){ {  4.0f, 0.0f, -4.0f }, 0.70f, 0.55f, 0.35f };
-    estatuas[2] = (Estatua){ { -4.0f, 0.0f,  4.0f }, 0.60f, 0.65f, 0.70f };
-    estatuas[3] = (Estatua){ {  4.0f, 0.0f,  4.0f }, 0.85f, 0.80f, 0.55f };
+    // ==========================================
+    // SALA 1 (Esquerda): Apenas Esculturas
+    // Centro da sala é em X = -15.0
+    // ==========================================
+    estatuas[0] = (Estatua){ { -19.0f, 0.0f, -4.0f }, 0.80f, 0.75f, 0.65f };
+    estatuas[1] = (Estatua){ { -11.0f, 0.0f, -4.0f }, 0.70f, 0.55f, 0.35f };
+    estatuas[2] = (Estatua){ { -19.0f, 0.0f,  4.0f }, 0.60f, 0.65f, 0.70f };
+    estatuas[3] = (Estatua){ { -11.0f, 0.0f,  4.0f }, 0.85f, 0.80f, 0.55f };
 
-    // quadros encostados nas quatro paredes
-    quadros[0] = (Quadro){ {  0.0f, 3.0f, -9.9f },   0.0f, 3.0f, 2.0f };
-    quadros[1] = (Quadro){ {  0.0f, 3.0f,  9.9f }, 180.0f, 3.0f, 2.0f };
-    quadros[2] = (Quadro){ { -9.9f, 3.0f,  0.0f },  90.0f, 3.0f, 2.0f };
-    quadros[3] = (Quadro){ {  9.9f, 3.0f,  0.0f }, -90.0f, 3.0f, 2.0f };
+    // ==========================================
+    // SALA 2 (Direita): Apenas Quadros
+    // Centro da sala é em X = 15.0
+    // ==========================================
+    // Quadro 1: Parede do fundo (-Z)
+    quadros[0] = (Quadro){ {  15.0f, 3.0f, -9.9f },   0.0f, 3.0f, 2.0f };
+    
+    // Quadro 2: Parede da frente (+Z)
+    quadros[1] = (Quadro){ {  15.0f, 3.0f,  9.9f }, 180.0f, 3.0f, 2.0f };
+    
+    // Quadro 3: Parede da direita (+X), que é totalmente fechada
+    quadros[2] = (Quadro){ {  24.9f, 3.0f,  0.0f }, -90.0f, 3.0f, 2.0f };
+    
+    // Quadro 4: Parede da esquerda (-X)
+    // Como o corredor fica no meio (Z de -3 a 3), vamos colocar este quadro
+    // no pilar que fica na parte de trás da parede (Z = -6.5).
+    quadros[3] = (Quadro){ {   5.1f, 3.0f, -6.5f },  90.0f, 3.0f, 2.0f };
 
     // Tenta carregar a textura. Se o arquivo não existir ou o texture.h não estiver pronto, ele retorna 0 em segurança
     texturaQuadro = textura_carregar("assets/textures/quadro.jpg");
