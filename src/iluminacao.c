@@ -82,7 +82,32 @@ static void aplicar_luz(GLenum slot, LuzMuseu luz) {
     glEnable(slot);
 }
 
+// descobre em qual ambiente a camera esta, so pelo x (ja que todo o ambiente ta no mesmo eixo x)
+static Ambiente ambiente_da_camera(Vetor3 posicao) {
+    if (posicao.x < C_XMIN) return AMBIENTE_SALA1;
+    if (posicao.x > C_XMAX) return AMBIENTE_SALA2;
+    return AMBIENTE_CORREDOR;
+}
 
+// monta a ordem de prioridade dos ambientes: o atual primeiro, depois os vizinhos
+// assim as luzes que da pra ver pela porta continuam acesas se ainda houver slot
+static void ordem_de_prioridade(Ambiente atual, Ambiente ordem[3]) {
+    if (atual == AMBIENTE_SALA1) {
+        ordem[0] = AMBIENTE_SALA1;
+        ordem[1] = AMBIENTE_CORREDOR;
+        ordem[2] = AMBIENTE_SALA2;
+    }
+    else if (atual == AMBIENTE_SALA2) {
+        ordem[0] = AMBIENTE_SALA2;
+        ordem[1] = AMBIENTE_CORREDOR;
+        ordem[2] = AMBIENTE_SALA1;
+    }
+    else {
+        ordem[0] = AMBIENTE_CORREDOR;
+        ordem[1] = AMBIENTE_SALA2;
+        ordem[2] = AMBIENTE_SALA1;
+    }
+}
 
 static LuzMuseu luzes[NUM_LUZES_MUSEU];
 
