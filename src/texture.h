@@ -3,10 +3,12 @@
 #ifndef MUSEU_TEXTURE_H
 #define MUSEU_TEXTURE_H
 
-#include <GL/gl.h>
+#include <GL/glut.h>
 
-// carrega uma imagem do disco e retorna o ID da textura OpenGL gerada
-// retorna 0 caso falhe
-GLuint textura_carregar(const char *caminhoArquivo);
+// Variável que armazena o ID da textura está declarada em src/textura.c
+//extern GLuint texturaChao;
 
-#endif 
+GLuint textura_carregar(const char *caminhoArquivo);    // Função para carregar uma textura a partir de um arquivo de imagem
+//void texturizarChao();                                  // Função para definir o chão com a textura carregada
+
+#endif
