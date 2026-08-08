@@ -41,3 +41,19 @@ static void direcao_camera(float *dx, float *dy, float *dz) {
     *dy = sinf(radPitch);
     *dz = sinf(radYaw) * cosf(radPitch);
 }
+
+void camera_iniciar(void) {
+    cam.x = 0.0f;
+    cam.y = ALTURA_OLHOS;
+    cam.z = 8.0f;
+    cam.yaw = -90.0f;   // olhando pra -z
+    cam.pitch = 0.0f;
+    cam.modo = CAMERA_MODO_LIVRE;
+
+    // zera estado das tecla
+    for (int i = 0; i < 256; i++) teclas[i] = 0;
+
+    montar_caminho_tour();
+    trecho_atual = 0;
+    t_atual = 0.0f;
+}
