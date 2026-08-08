@@ -86,6 +86,9 @@ void reshape(int w, int h) {
     gluPerspective(45.0, ratio, 0.1, 100.0); 
     
     glMatrixMode(GL_MODELVIEW);  // retorna pro modo de visualização
+
+    // recentraliza o cursor pra camera nao dar um salto quando alternar a janela entre tela cheia
+    glutWarpPointer(largura_janela / 2, altura_janela / 2);
 }
 
 // --- FUNÇÃO PARA TELA CHEIA NO F11
