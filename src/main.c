@@ -128,6 +128,14 @@ void tecla_solta(unsigned char key, int x, int y) {
     camera_tecla_solta(key);
 }
 
+// lê as teclas especiais 
+void teclas_especiais(int key, int x, int y) {
+    // chama pra alternar tela cheia com F11, usando a constando do glut pois F11 n tem ascii
+    if(key == GLUT_KEY_F11) {
+        alternar_tela_cheia();
+    }
+}
+
 // -- MOVIMENTAÇÃO DO MOUSE
 void movimento_mouse(int x, int y){
     camera_processar_mouse(x, y, largura_janela, altura_janela);
@@ -164,6 +172,7 @@ int main(int argc, char** argv) {
     glutReshapeFunc(reshape);
     glutKeyboardFunc(tecla_pressionada);
     glutKeyboardUpFunc(tecla_solta);
+    glutSpecialFunc(teclas_especiais);
     glutPassiveMotionFunc(movimento_mouse);
 
     glutTimerFunc(16, atualizar, 0);
