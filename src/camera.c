@@ -9,7 +9,15 @@
 #define ALTURA_OLHOS 1.7f
 #define VELOCIDADE_TOUR 0.2f // fração de trecho percorrida por segundo
 
-#define NUM_TRECHOS 4
+#define NUM_TRECHOS 11 // quantos pontos tem o caminho do tour
+#define TENSAO_TOUR 0.5f // tensão da curva de bézier 
+
+// define um ponto do tour; onde a camera passa e para onde olha
+typedef struct
+{
+    Vetor3 posicao;
+    Vetor3 alvo;
+} PontoTour;
 
 // struct com os valores das regioes navegaveis do museu, plano XZ
 typedef struct {
@@ -37,7 +45,8 @@ static Camera cam;
 static int teclas[256]; // estado das teclas (1: pressionada)
 static int ignorar_prox_mouse = 0; // evita loop quando recentraliza o cursor
 
-// caminho do tour, com 4 curvas de bezier que formam o circuito
+// caminho do tour, pontos definidos na mao e curvas geradas com base neles
+static PontoTour pontos_tour[NUM_TRECHOS];
 static CurvaBezier caminho_tour[NUM_TRECHOS];
 static int trecho_atual = 0;
 static float t_atual = 0.0f;
@@ -55,6 +64,18 @@ static int posicao_valida(float x, float z) {
 
 // monta os pontos de controle do circuito do tour
 static void montar_caminho_tour(void) {
+    /*
+    pontos do percurso:
+    0-3: contorno da sala 1; olhando para o centro da sala
+    4-5: corredor ida; olhando para o fundo/centro da sala 2
+    6-9: contorno da sala 2 (losango); olhando para cada quadro por vez
+    10: corredor volta; olhando pro fundo/centro da sala 1
+
+    na sala 2 ficar 4 ou 5 unidades da parede
+    */
+
+
+
     float y = ALTURA_OLHOS;
     float r = 6.0f; // raio do circuito
     float k = 3.31f;    // deslocamento dos pontos de controle (aproxima um circulo)
