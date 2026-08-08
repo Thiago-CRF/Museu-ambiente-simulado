@@ -11,6 +11,28 @@
 
 #define NUM_TRECHOS 4
 
+// struct com os valores das regioes navegaveis do museu, plano XZ
+typedef struct {
+    float xmin, xmax, zmin, zmax;
+} RegiaoNavegavel;
+
+#define NUM_REGIOES 3   // 3 pois tem duas salas e um corredor
+
+static const RegiaoNavegavel regioes[NUM_REGIOES] = {
+    // sala 1, encolhida pela margem pra camera nao encostar na parede
+    { S1_XMIN + MARGEM_COLISAO, S1_XMAX - MARGEM_COLISAO,
+      S1_ZMIN + MARGEM_COLISAO, S1_ZMAX - MARGEM_COLISAO },
+
+    // corredor: avanca 1 unidade pra dentro das duas salas pras
+    // portas nao ficarem bloqueadas pela margem das regioes vizinhas
+    { C_XMIN - 1.0f, C_XMAX + 1.0f,
+      C_ZMIN + MARGEM_COLISAO, C_ZMAX - MARGEM_COLISAO },
+
+    // sala 2
+    { S2_XMIN + MARGEM_COLISAO, S2_XMAX - MARGEM_COLISAO,
+      S2_ZMIN + MARGEM_COLISAO, S2_ZMAX - MARGEM_COLISAO }
+};
+
 static Camera cam;
 static int teclas[256]; // estado das teclas (1: pressionada)
 static int ignorar_prox_mouse = 0; // evita loop quando recentraliza o cursor
@@ -19,6 +41,17 @@ static int ignorar_prox_mouse = 0; // evita loop quando recentraliza o cursor
 static CurvaBezier caminho_tour[NUM_TRECHOS];
 static int trecho_atual = 0;
 static float t_atual = 0.0f;
+
+// verifica se a posição esta dentro de alguma regiao navegavel
+static int posicao_valida(float x, float z) {
+    for (int i = 0; i < NUM_REGIOES; i++) {
+        if (x >= regioes[i].xmin && x <= regioes[i].xmax &&
+            z >= regioes[i].zmin && z <= regioes[i].zmax) {
+            return 1;
+        }
+    }
+    return 0;
+}
 
 // monta os pontos de controle do circuito do tour
 static void montar_caminho_tour(void) {
@@ -43,10 +76,11 @@ static void direcao_camera(float *dx, float *dy, float *dz) {
 }
 
 void camera_iniciar(void) {
-    cam.x = 0.0f;
+    // comeca no centro da sala 1, olhando na direcao do corredor
+    cam.x = -15.0f;
     cam.y = ALTURA_OLHOS;
-    cam.z = 8.0f;
-    cam.yaw = -90.0f;   // olhando pra -z
+    cam.z = 0.0f;
+    cam.yaw = 0.0f;   // olhando pra +x
     cam.pitch = 0.0f;
     cam.modo = CAMERA_MODO_LIVRE;
 
@@ -95,14 +129,15 @@ static void atualizar_modo_livre(float dt) {
         novoX += rx * passo; novoZ += rz * passo; 
     }
 
-    // colisao simples com as paredes
-    if (novoX < SALA_MIN_X) novoX = SALA_MIN_X;
-    if (novoX > SALA_MAX_X) novoX = SALA_MAX_X;
-    if (novoZ < SALA_MIN_Z) novoZ = SALA_MIN_Z;
-    if (novoZ > SALA_MAX_Z) novoZ = SALA_MAX_Z;
+    // seção de teste de colisão da camera
+    // testa cada eixo separadamente pra poder deslizar ao encostar na parede em vez de travar o movimento
+    if (posicao_valida(novoX, cam.z)) {
+        cam.x = novoX;
+    }
+    if (posicao_valida(cam.x, novoZ)) {
+        cam.z = novoZ;
+    }
 
-    cam.x = novoX;
-    cam.z = novoZ;
     cam.y = ALTURA_OLHOS;
 }
 

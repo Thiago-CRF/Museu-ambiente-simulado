@@ -3,28 +3,6 @@
 #include "common.h"
 #include "texture.h"
 
-// --- LIMITES FÍSICOS DA NOVA PLANTA ---
-// Sala 1 (Esculturas) - Fica à esquerda
-#define S1_XMIN -25.0f
-#define S1_XMAX -5.0f
-#define S1_ZMIN -10.0f
-#define S1_ZMAX  10.0f
-
-// Corredor - Fica no centro
-#define C_XMIN  -5.0f
-#define C_XMAX   5.0f
-#define C_ZMIN  -3.0f // Mais estreito que as salas
-#define C_ZMAX   3.0f
-
-// Sala 2 (Quadros) - Fica à direita
-#define S2_XMIN  5.0f
-#define S2_XMAX  25.0f
-#define S2_ZMIN -10.0f
-#define S2_ZMAX  10.0f
-
-// --- ALTURAS (PÉ-DIREITO) ---
-#define ALTURA_SALA     7.0f  // Salas bem altas
-#define ALTURA_CORREDOR 4.0f  // Corredor mais baixo
 
 static GLuint texturaPiso = 0;
 static GLuint texturaParede = 0;
