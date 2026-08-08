@@ -95,5 +95,13 @@ static void atualizar_modo_livre(float dt) {
         novoX += rx * passo; novoZ += rz * passo; 
     }
 
-    
+    // colisao simples com as paredes
+    if (novoX < SALA_MIN_X) novoX = SALA_MIN_X;
+    if (novoX > SALA_MAX_X) novoX = SALA_MAX_X;
+    if (novoZ < SALA_MIN_Z) novoZ = SALA_MIN_Z;
+    if (novoZ > SALA_MAX_Z) novoZ = SALA_MAX_Z;
+
+    cam.x = novoX;
+    cam.z = novoZ;
+    cam.y = ALTURA_OLHOS;
 }
