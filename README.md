@@ -8,6 +8,6 @@ Ambiente simulado de um museu feito em OpenGL 2.1 usando C. Projeto final da mat
 
 - Compilar:
     Abra o terminal na pasta do projeto e execute:
-    ´gcc main.c -o museu -lGL -lGLU -lglut`
+    ´gcc src/main.c -o museu -lGL -lGLU -lglut`
 - Executar:
     `./museu`
