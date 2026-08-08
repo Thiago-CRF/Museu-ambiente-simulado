@@ -171,3 +171,28 @@ void camera_alternar_modo(void) {
         cam.modo = CAMERA_MODO_LIVRE;
     }
 }
+
+void camera_processar_mouse(int x, int y, int largura_janela, int altura_janela) {
+    // mouse não controla visao no modo tour
+    if(cam.modo == CAMERA_MODO_TOUR)
+        return;
+
+
+    // processa o ignorar mouse pra quando o modo de camera mudar não ter bug visual
+    if(ignorar_prox_mouse){
+        ignorar_prox_mouse = 0;
+        return;
+    }
+
+    int centro_x = largura_janela / 2;
+    int centro_y = altura_janela / 2;
+
+    int desloc_x = x - centro_x;
+    int desloc_y = y - centro_y;
+
+    if (desloc_x == 0 && desloc_y == 0) 
+        return;
+
+    cam.yaw += desloc_x * SENSIBILIDADE_MOUSE;
+    cam.pitch -= desloc_y * SENSIBILIDADE_MOUSE;
+}
