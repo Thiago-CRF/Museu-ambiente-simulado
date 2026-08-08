@@ -151,3 +151,12 @@ void camera_atualizar(float dt){
     atualizar_modo_livre(dt);
 }
 
+void camera_aplicar_visualizacao(void) {
+    // pega pra onde a camera esta olhando e aplica no gluLookAt
+    float dx, dy, dz;
+    direcao_camera(&dx, &dy, &dz);
+
+    gluLookAt(cam.x, cam.y, cam.z,
+              cam.x + dx, cam.y + dy, cam.z + dz,
+              0.0, 1.0, 0.0);
+}
