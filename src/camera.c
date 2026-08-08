@@ -107,16 +107,40 @@ static void montar_caminho_tour(void) {
     na sala 2 ficar 4 ou 5 unidades da parede
     */
 
-
-
     float y = ALTURA_OLHOS;
-    float r = 6.0f; // raio do circuito
-    float k = 3.31f;    // deslocamento dos pontos de controle (aproxima um circulo)
+    
+    // alvos que são reaproveitados em varios pontos
+    Vetor3 centro_sala1 = { -15.0f, 2.0f, 0.0f }; // meio da sala das esculturas
+    Vetor3 fundo_sala2  = {  25.0f, 2.0f, 0.0f }; // parede do fundo da sala 2
+    Vetor3 fundo_sala1  = { -25.0f, 2.0f, 0.0f }; // parede do fundo da sala 1
 
-    caminho_tour[0] = (CurvaBezier){{ r, y, 0}, { r, y, k}, { k, y, r}, { 0, y, r}};
-    caminho_tour[1] = (CurvaBezier){{ 0, y, r}, {-k, y, r}, {-r, y, k}, {-r, y, 0}};
-    caminho_tour[2] = (CurvaBezier){{-r, y, 0}, {-r, y,-k}, {-k, y,-r}, { 0, y,-r}};
-    caminho_tour[3] = (CurvaBezier){{ 0, y,-r}, { k, y,-r}, { r, y,-k}, { r, y, 0}};
+    // posicoes dos quadros, as mesmas usadas em exibicoes.c 
+    // MUDAR CASO QUEIRA COLOCAR EM MAIS QUADROS ESPECIFICOS, com base em exibicoes.c
+    Vetor3 quadro_fundo    = { 15.0f, 3.0f, -9.9f };
+    Vetor3 quadro_direita  = { 24.9f, 3.0f, 0.0f };
+    Vetor3 quadro_frente   = { 15.0f, 3.0f, 9.9f };
+    Vetor3 quadro_esquerda = { 5.1f, 3.0f, -6.5f };
+
+    // sala 1: contorna perto das paredes sempre olhando pro centro das esculturas
+    pontos_tour[0] = (PontoTour){ {-8.0f, y, 6.0f}, centro_sala1 };
+    pontos_tour[1] = (PontoTour){ {-21.0f, y, 6.0f}, centro_sala1 };
+    pontos_tour[2] = (PontoTour){ {-21.0f, y, -6.0f}, centro_sala1 };
+    pontos_tour[3] = (PontoTour){ {-8.0f, y, -6.0f}, centro_sala1 };
+
+    // corredor de ida: entra pela porta olhando pra sala 2
+    pontos_tour[4] = (PontoTour){ {-7.0f, y, -1.0f}, fundo_sala2 };
+    pontos_tour[5] = (PontoTour){ {8.0f, y, -1.0f}, fundo_sala2 };
+
+    // sala 2: percorre o meio da sala virando pra cada parede com quadro
+    pontos_tour[6] = (PontoTour){ {15.0f, y, -6.0f}, quadro_fundo };
+    pontos_tour[7] = (PontoTour){ {20.0f, y, 0.0f}, quadro_direita };
+    pontos_tour[8] = (PontoTour){ {15.0f, y, 6.0f}, quadro_frente };
+    pontos_tour[9] = (PontoTour){ {10.0f, y, 1.0f}, quadro_esquerda };
+
+    // corredor de volta: atravessa por outra faixa de z e olha pra sala 1
+    pontos_tour[10] = (PontoTour){ {-7.0f, y, 1.0f}, fundo_sala1 };
+
+    gerar_curvas_tour();
 }
 
 // calcula o vetor de direcao a partir dos angulos da camera
