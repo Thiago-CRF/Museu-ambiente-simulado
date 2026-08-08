@@ -207,3 +207,13 @@ void camera_processar_mouse(int x, int y, int largura_janela, int altura_janela)
     ignorar_prox_mouse = 1;
     glutWarpPointer(centro_x, centro_y);
 }
+
+// registram as teclas sendo clicadas e soltas
+
+void camera_tecla_pressionada(unsigned char tecla) {
+    teclas[tecla] = 1;
+}
+
+void camera_tecla_solta(unsigned char tecla) {
+    teclas[tecla] = 0;
+}
