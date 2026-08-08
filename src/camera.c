@@ -9,14 +9,14 @@
 #define ALTURA_OLHOS 1.7f
 #define VELOCIDADE_TOUR 0.2f // fração de trecho percorrida por segundo
 
-#define NUM_TRECHO 4
+#define NUM_TRECHOS 4
 
 static Camera cam;
 static int teclas[256]; // estado das teclas (1: pressionada)
 static int ignorar_prox_mouse = 0; // evita loop quando recentraliza o cursor
 
 // caminho do tour, com 4 curvas de bezier que formam o circuito
-static CurvaBezier caminho_tour[NUM_TRECHO];
+static CurvaBezier caminho_tour[NUM_TRECHOS];
 static int trecho_atual = 0;
 static float t_atual = 0.0f;
 
@@ -104,4 +104,17 @@ static void atualizar_modo_livre(float dt) {
     cam.x = novoX;
     cam.z = novoZ;
     cam.y = ALTURA_OLHOS;
+}
+
+// movimentacao automatica seguindo as curvas de bezier
+static void atualizar_modo_tour(float dt) {
+    t_atual += VELOCIDADE_TOUR * dt;
+
+    // qauando terminar um trecho, passa pro proximo (voltando ao inicio no fim)
+    while (t_atual >= 1.0f) {
+        t_atual -= 1.0f;
+        trecho_atual = (trecho_atual + 1) % NUM_TRECHOS;
+    }
+
+    Vetor3 posicao = curva_avaliar(caminho_tour[trecho_atual], t_atual);
 }
