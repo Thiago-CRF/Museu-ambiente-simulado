@@ -3,21 +3,39 @@
 #include "common.h"
 #include "texture.h"
 
-// limites fisicos da sala
-#define SALA_X  10.0f
-#define SALA_Z  10.0f
-#define ALTURA_PAREDE 6.0f
+// --- LIMITES FÍSICOS DA NOVA PLANTA ---
+// Sala 1 (Esculturas) - Fica à esquerda
+#define S1_XMIN -25.0f
+#define S1_XMAX -5.0f
+#define S1_ZMIN -10.0f
+#define S1_ZMAX  10.0f
+
+// Corredor - Fica no centro
+#define C_XMIN  -5.0f
+#define C_XMAX   5.0f
+#define C_ZMIN  -3.0f // Mais estreito que as salas
+#define C_ZMAX   3.0f
+
+// Sala 2 (Quadros) - Fica à direita
+#define S2_XMIN  5.0f
+#define S2_XMAX  25.0f
+#define S2_ZMIN -10.0f
+#define S2_ZMAX  10.0f
+
+// --- ALTURAS (PÉ-DIREITO) ---
+#define ALTURA_SALA     7.0f  // Salas bem altas
+#define ALTURA_CORREDOR 4.0f  // Corredor mais baixo
 
 static GLuint texturaPiso = 0;
 static GLuint texturaParede = 0;
+static GLuint texturaTeto = 0;
 
 void cena_iniciar(void) {
-    // se o arquivo nao existir, textura_carregar retorna 0 e a cena usa so cor
     texturaPiso = textura_carregar("assets/textures/piso.jpg");
     texturaParede = textura_carregar("assets/textures/parede.jpg");
+    texturaTeto = textura_carregar("assets/textures/teto.jpg");
 }
 
-// desenha um quad com textura opcional e coordenadas de textura repetidas
 static void desenhar_quad(GLuint textura, float repeticao,
                           float nx, float ny, float nz,
                           float x1, float y1, float z1,
@@ -44,56 +62,117 @@ static void desenhar_quad(GLuint textura, float repeticao,
 }
 
 void cena_desenhar(void) {
-    // piso
+    // ==========================================
+    // 1. PISO (Normais para cima: 0, 1, 0)
+    // ==========================================
     glColor3f(0.6f, 0.6f, 0.6f);
-    desenhar_quad(texturaPiso, 8.0f,
-                  0.0f, 1.0f, 0.0f,
-                  -SALA_X, 0.0f, -SALA_Z,
-                  -SALA_X, 0.0f,  SALA_Z,
-                   SALA_X, 0.0f,  SALA_Z,
-                   SALA_X, 0.0f, -SALA_Z);
+    
+    // Piso - Sala 1
+    desenhar_quad(texturaPiso, 8.0f, 0.0f, 1.0f, 0.0f,
+                  S1_XMIN, 0.0f, S1_ZMIN,  S1_XMIN, 0.0f, S1_ZMAX,
+                  S1_XMAX, 0.0f, S1_ZMAX,  S1_XMAX, 0.0f, S1_ZMIN);
+    
+    // Piso - Corredor
+    desenhar_quad(texturaPiso, 4.0f, 0.0f, 1.0f, 0.0f,
+                  C_XMIN, 0.0f, C_ZMIN,  C_XMIN, 0.0f, C_ZMAX,
+                  C_XMAX, 0.0f, C_ZMAX,  C_XMAX, 0.0f, C_ZMIN);
 
-    // teto
-    glColor3f(0.35f, 0.35f, 0.38f);
-    desenhar_quad(0, 1.0f,
-                  0.0f, -1.0f, 0.0f,
-                  -SALA_X, ALTURA_PAREDE, -SALA_Z,
-                   SALA_X, ALTURA_PAREDE, -SALA_Z,
-                   SALA_X, ALTURA_PAREDE,  SALA_Z,
-                  -SALA_X, ALTURA_PAREDE,  SALA_Z);
+    // Piso - Sala 2
+    desenhar_quad(texturaPiso, 8.0f, 0.0f, 1.0f, 0.0f,
+                  S2_XMIN, 0.0f, S2_ZMIN,  S2_XMIN, 0.0f, S2_ZMAX,
+                  S2_XMAX, 0.0f, S2_ZMAX,  S2_XMAX, 0.0f, S2_ZMIN);
 
-    // paredes (normais apontando pra dentro da sala)
+    // ==========================================
+    // 2. TETO (Normais para baixo: 0, -1, 0)
+    // ==========================================
+    glColor3f(0.85f, 0.85f, 0.85f); 
+    
+    // Teto - Sala 1 (Mais alto) - repetindo a textura 8 vezes
+    desenhar_quad(texturaTeto, 8.0f, 0.0f, -1.0f, 0.0f,
+                  S1_XMIN, ALTURA_SALA, S1_ZMIN,  S1_XMAX, ALTURA_SALA, S1_ZMIN,
+                  S1_XMAX, ALTURA_SALA, S1_ZMAX,  S1_XMIN, ALTURA_SALA, S1_ZMAX);
+
+    // Teto - Corredor (Mais baixo) - repetindo a textura 4 vezes
+    desenhar_quad(texturaTeto, 4.0f, 0.0f, -1.0f, 0.0f,
+                  C_XMIN, ALTURA_CORREDOR, C_ZMIN,  C_XMAX, ALTURA_CORREDOR, C_ZMIN,
+                  C_XMAX, ALTURA_CORREDOR, C_ZMAX,  C_XMIN, ALTURA_CORREDOR, C_ZMAX);
+
+    // Teto - Sala 2 (Mais alto) - repetindo a textura 8 vezes
+    desenhar_quad(texturaTeto, 8.0f, 0.0f, -1.0f, 0.0f,
+                  S2_XMIN, ALTURA_SALA, S2_ZMIN,  S2_XMAX, ALTURA_SALA, S2_ZMIN,
+                  S2_XMAX, ALTURA_SALA, S2_ZMAX,  S2_XMIN, ALTURA_SALA, S2_ZMAX);
+    // ==========================================
+    // 3. PAREDES
+    // ==========================================
     glColor3f(0.85f, 0.84f, 0.80f);
 
-    // parede do fundo (-z)
-    desenhar_quad(texturaParede, 4.0f,
-                  0.0f, 0.0f, 1.0f,
-                  -SALA_X, 0.0f, -SALA_Z,
-                   SALA_X, 0.0f, -SALA_Z,
-                   SALA_X, ALTURA_PAREDE, -SALA_Z,
-                  -SALA_X, ALTURA_PAREDE, -SALA_Z);
+    // --- PAREDES DA SALA 1 (Esquerda) ---
+    // Fundo (-Z)
+    desenhar_quad(texturaParede, 4.0f, 0.0f, 0.0f, 1.0f,
+                  S1_XMIN, 0.0f, S1_ZMIN,  S1_XMAX, 0.0f, S1_ZMIN,
+                  S1_XMAX, ALTURA_SALA, S1_ZMIN,  S1_XMIN, ALTURA_SALA, S1_ZMIN);
+    
+    // Frente (+Z)
+    desenhar_quad(texturaParede, 4.0f, 0.0f, 0.0f, -1.0f,
+                  S1_XMAX, 0.0f, S1_ZMAX,  S1_XMIN, 0.0f, S1_ZMAX,
+                  S1_XMIN, ALTURA_SALA, S1_ZMAX,  S1_XMAX, ALTURA_SALA, S1_ZMAX);
 
-    // parede da frente (+z)
-    desenhar_quad(texturaParede, 4.0f,
-                  0.0f, 0.0f, -1.0f,
-                   SALA_X, 0.0f, SALA_Z,
-                  -SALA_X, 0.0f, SALA_Z,
-                  -SALA_X, ALTURA_PAREDE, SALA_Z,
-                   SALA_X, ALTURA_PAREDE, SALA_Z);
+    // Esquerda (-X) - Parede fechada
+    desenhar_quad(texturaParede, 4.0f, 1.0f, 0.0f, 0.0f,
+                  S1_XMIN, 0.0f, S1_ZMAX,  S1_XMIN, 0.0f, S1_ZMIN,
+                  S1_XMIN, ALTURA_SALA, S1_ZMIN,  S1_XMIN, ALTURA_SALA, S1_ZMAX);
 
-    // parede da esquerda (-x)
-    desenhar_quad(texturaParede, 4.0f,
-                  1.0f, 0.0f, 0.0f,
-                  -SALA_X, 0.0f,  SALA_Z,
-                  -SALA_X, 0.0f, -SALA_Z,
-                  -SALA_X, ALTURA_PAREDE, -SALA_Z,
-                  -SALA_X, ALTURA_PAREDE,  SALA_Z);
+    // Direita (+X) - Parede com a porta para o corredor
+    // 1º Pilar (fundo)
+    desenhar_quad(texturaParede, 2.0f, -1.0f, 0.0f, 0.0f,
+                  S1_XMAX, 0.0f, S1_ZMIN,  S1_XMAX, 0.0f, C_ZMIN,
+                  S1_XMAX, ALTURA_SALA, C_ZMIN,  S1_XMAX, ALTURA_SALA, S1_ZMIN);
+    // 2º Pilar (frente)
+    desenhar_quad(texturaParede, 2.0f, -1.0f, 0.0f, 0.0f,
+                  S1_XMAX, 0.0f, C_ZMAX,  S1_XMAX, 0.0f, S1_ZMAX,
+                  S1_XMAX, ALTURA_SALA, S1_ZMAX,  S1_XMAX, ALTURA_SALA, C_ZMAX);
+    // Verga (parede acima da abertura do corredor)
+    desenhar_quad(texturaParede, 1.0f, -1.0f, 0.0f, 0.0f,
+                  S1_XMAX, ALTURA_CORREDOR, C_ZMIN,  S1_XMAX, ALTURA_CORREDOR, C_ZMAX,
+                  S1_XMAX, ALTURA_SALA, C_ZMAX,  S1_XMAX, ALTURA_SALA, C_ZMIN);
 
-    // parede da direita (+x)
-    desenhar_quad(texturaParede, 4.0f,
-                  -1.0f, 0.0f, 0.0f,
-                   SALA_X, 0.0f, -SALA_Z,
-                   SALA_X, 0.0f,  SALA_Z,
-                   SALA_X, ALTURA_PAREDE,  SALA_Z,
-                   SALA_X, ALTURA_PAREDE, -SALA_Z);
+    // --- PAREDES DO CORREDOR ---
+    // Fundo (-Z)
+    desenhar_quad(texturaParede, 2.0f, 0.0f, 0.0f, 1.0f,
+                  C_XMIN, 0.0f, C_ZMIN,  C_XMAX, 0.0f, C_ZMIN,
+                  C_XMAX, ALTURA_CORREDOR, C_ZMIN,  C_XMIN, ALTURA_CORREDOR, C_ZMIN);
+    // Frente (+Z)
+    desenhar_quad(texturaParede, 2.0f, 0.0f, 0.0f, -1.0f,
+                  C_XMAX, 0.0f, C_ZMAX,  C_XMIN, 0.0f, C_ZMAX,
+                  C_XMIN, ALTURA_CORREDOR, C_ZMAX,  C_XMAX, ALTURA_CORREDOR, C_ZMAX);
+
+    // --- PAREDES DA SALA 2 (Direita) ---
+    // Fundo (-Z)
+    desenhar_quad(texturaParede, 4.0f, 0.0f, 0.0f, 1.0f,
+                  S2_XMIN, 0.0f, S2_ZMIN,  S2_XMAX, 0.0f, S2_ZMIN,
+                  S2_XMAX, ALTURA_SALA, S2_ZMIN,  S2_XMIN, ALTURA_SALA, S2_ZMIN);
+
+    // Frente (+Z)
+    desenhar_quad(texturaParede, 4.0f, 0.0f, 0.0f, -1.0f,
+                  S2_XMAX, 0.0f, S2_ZMAX,  S2_XMIN, 0.0f, S2_ZMAX,
+                  S2_XMIN, ALTURA_SALA, S2_ZMAX,  S2_XMAX, ALTURA_SALA, S2_ZMAX);
+
+    // Direita (+X) - Parede fechada
+    desenhar_quad(texturaParede, 4.0f, -1.0f, 0.0f, 0.0f,
+                  S2_XMAX, 0.0f, S2_ZMIN,  S2_XMAX, 0.0f, S2_ZMAX,
+                  S2_XMAX, ALTURA_SALA, S2_ZMAX,  S2_XMAX, ALTURA_SALA, S2_ZMIN);
+
+    // Esquerda (-X) - Parede com a porta para o corredor
+    // 1º Pilar (frente)
+    desenhar_quad(texturaParede, 2.0f, 1.0f, 0.0f, 0.0f,
+                  S2_XMIN, 0.0f, S2_ZMAX,  S2_XMIN, 0.0f, C_ZMAX,
+                  S2_XMIN, ALTURA_SALA, C_ZMAX,  S2_XMIN, ALTURA_SALA, S2_ZMAX);
+    // 2º Pilar (fundo)
+    desenhar_quad(texturaParede, 2.0f, 1.0f, 0.0f, 0.0f,
+                  S2_XMIN, 0.0f, C_ZMIN,  S2_XMIN, 0.0f, S2_ZMIN,
+                  S2_XMIN, ALTURA_SALA, S2_ZMIN,  S2_XMIN, ALTURA_SALA, C_ZMIN);
+    // Verga (parede acima da abertura do corredor)
+    desenhar_quad(texturaParede, 1.0f, 1.0f, 0.0f, 0.0f,
+                  S2_XMIN, ALTURA_CORREDOR, C_ZMAX,  S2_XMIN, ALTURA_CORREDOR, C_ZMIN,
+                  S2_XMIN, ALTURA_SALA, C_ZMIN,  S2_XMIN, ALTURA_SALA, C_ZMAX);
 }
