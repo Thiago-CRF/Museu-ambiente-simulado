@@ -36,22 +36,22 @@ void exponatos_iniciar(void) {
     // Centro da sala é em X = 15.0
     // ==========================================
     // Quadro 1: Parede do fundo (-Z)
-    quadros[0] = (Quadro){ {  15.0f, 3.0f, -9.9f },   0.0f, 3.0f, 2.0f,
-                            textura_carregar("assets/textures/Tito_Lobo.jpg") };
+    quadros[0] = (Quadro){ {  15.0f, 3.0f, -9.9f },   0.0f, 3.0f, 2.18f,
+                        textura_carregar("assets/textures/Salvador_Dali.jpg") };
     
     // Quadro 2: Parede da frente (+Z)
-    quadros[1] = (Quadro){ {  15.0f, 3.0f,  9.9f }, 180.0f, 3.0f, 2.0f,
-                            textura_carregar("assets/textures/Vangogh.jpg") };
+    quadros[1] = (Quadro){ {  15.0f, 3.0f,  9.9f }, 180.0f, 3.0f, 3.78f,
+                        textura_carregar("assets/textures/Vangogh.jpg") };
     
     // Quadro 3: Parede da direita (+X), que é totalmente fechada
-    quadros[2] = (Quadro){ {  24.9f, 3.0f,  0.0f }, -90.0f, 3.0f, 2.0f,
-                            textura_carregar("assets/textures/Salvador_Dali.jpg") };
+    quadros[2] = (Quadro){ {  24.9f, 3.0f,  0.0f }, -90.0f, 6.54f, 4.36f,
+                        textura_carregar("assets/textures/Tito_Lobo.jpg") };
     
     // Quadro 4: Parede da esquerda (-X)
     // Como o corredor fica no meio (Z de -3 a 3), vamos colocar este quadro
     // no pilar que fica na parte de trás da parede (Z = -6.5).
-    quadros[3] = (Quadro){ {   5.1f, 3.0f, -6.5f },  90.0f, 3.0f, 2.0f,
-                            textura_carregar("assets/textures/Mona_Lisa.PNG") };
+    quadros[3] = (Quadro){ {   5.1f, 3.0f, -6.5f },  90.0f, 3.0f, 4.36f,
+                        textura_carregar("assets/textures/Mona_Lisa.PNG") };
 }
 
 // desenha um pedestal simples na origem local
