@@ -136,12 +136,10 @@ static void atualizar_modo_tour(float dt) {
 void camera_atualizar(float dt){
     if(cam.modo == CAMERA_MODO_TOUR){
         // se o usuario mexer no WASD ele assume o controle 
-        if(teclas['w'] || teclas['a'] || teclas['W'] || teclas['A']) {
+        if(teclas['w'] || teclas['a'] || teclas['s'] || teclas['d'] ||
+           teclas['W'] || teclas['A'] || teclas['S'] || teclas['D']) {
             cam.modo = CAMERA_MODO_LIVRE;
         }
-        if(teclas['s'] || teclas['d'] || teclas['S'] || teclas['D']){
-            cam.modo = CAMERA_MODO_LIVRE;
-        } 
         else {
             atualizar_modo_tour(dt);
             return;
