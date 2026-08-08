@@ -76,10 +76,11 @@ static void direcao_camera(float *dx, float *dy, float *dz) {
 }
 
 void camera_iniciar(void) {
-    cam.x = 0.0f;
+    // comeca no centro da sala 1, olhando na direcao do corredor
+    cam.x = -15.0f;
     cam.y = ALTURA_OLHOS;
-    cam.z = 8.0f;
-    cam.yaw = -90.0f;   // olhando pra -z
+    cam.z = 0.0f;
+    cam.yaw = 0.0f;   // olhando pra +x
     cam.pitch = 0.0f;
     cam.modo = CAMERA_MODO_LIVRE;
 
@@ -128,14 +129,15 @@ static void atualizar_modo_livre(float dt) {
         novoX += rx * passo; novoZ += rz * passo; 
     }
 
-    // colisao simples com as paredes
-    if (novoX < SALA_MIN_X) novoX = SALA_MIN_X;
-    if (novoX > SALA_MAX_X) novoX = SALA_MAX_X;
-    if (novoZ < SALA_MIN_Z) novoZ = SALA_MIN_Z;
-    if (novoZ > SALA_MAX_Z) novoZ = SALA_MAX_Z;
+    // seção de teste de colisão da camera
+    // testa cada eixo separadamente pra poder deslizar ao encostar na parede em vez de travar o movimento
+    if (posicao_valida(novoX, cam.z)) {
+        cam.x = novoX;
+    }
+    if (posicao_valida(cam.x, novoZ)) {
+        cam.z = novoZ;
+    }
 
-    cam.x = novoX;
-    cam.z = novoZ;
     cam.y = ALTURA_OLHOS;
 }
 
