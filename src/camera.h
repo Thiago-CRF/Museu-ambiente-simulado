@@ -37,4 +37,7 @@ void camera_processar_mouse(int x, int y, int larguraJanela, int alturaJanela);
 void camera_tecla_pressionada(unsigned char tecla);
 void camera_tecla_solta(unsigned char tecla);
 
+// retorna a posicao atual da camera (usado pra iluminacao)
+Vetor3 camera_obter_posicao(void);
+
 #endif // MUSEU_CAMERA_H
