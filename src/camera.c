@@ -62,6 +62,39 @@ static int posicao_valida(float x, float z) {
     return 0;
 }
 
+// gera os pontos de controle de curva de bézier a partir dos pontos do percurso definidos
+// a tangente em cada ponto vem da direção entreo o proximo vizinho e anterior
+// pra que os trechos se emendem sem um movimento brusco
+void gerar_curvas_tour() {
+    for(int i = 0; i< NUM_TRECHOS; i++){
+        // indices dos vizinho, usando % pra curva fechar em circuito
+        int anterior  = (i - 1 + NUM_TRECHOS) % NUM_TRECHOS;
+        int seguinte  = (i + 1) % NUM_TRECHOS;
+        int posterior = (i + 2) % NUM_TRECHOS;
+        
+        Vetor3 ponto_ant = pontos_tour[anterior].posicao;
+        Vetor3 ponto_ini = pontos_tour[i].posicao;
+        Vetor3 ponto_fim = pontos_tour[seguinte].posicao;
+        Vetor3 ponto_post= pontos_tour[posterior].posicao;
+
+        // o trecho começa e trermina nos pontos do circuito
+        caminho_tour[i].p0 = ponto_ini;
+        caminho_tour[i].p3 = ponto_fim;
+
+        float fator = TENSAO_TOUR / 3.0f; // fator de curva da curva de bezier
+
+        // p1 sai de ponto_ini na direcao (ponto_fim - ponto_ant)
+        caminho_tour[i].p1.x = ponto_ini.x + (ponto_fim.x - ponto_ant.x) * fator;
+        caminho_tour[i].p1.y = ponto_ini.y + (ponto_fim.y - ponto_ant.y) * fator;
+        caminho_tour[i].p1.z = ponto_ini.z + (ponto_fim.z - ponto_ant.z) * fator;
+
+        // p2 chega em ponto_fim na direcao (ponto_post - ponto_ini)
+        caminho_tour[i].p2.x = ponto_fim.x - (ponto_post.x - ponto_ini.x) * fator;
+        caminho_tour[i].p2.y = ponto_fim.y - (ponto_post.y - ponto_ini.y) * fator;
+        caminho_tour[i].p2.z = ponto_fim.z - (ponto_post.z - ponto_ini.z) * fator;        
+    }
+}
+
 // monta os pontos de controle do circuito do tour
 static void montar_caminho_tour(void) {
     /*
