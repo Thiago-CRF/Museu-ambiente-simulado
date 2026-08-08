@@ -160,3 +160,14 @@ void camera_aplicar_visualizacao(void) {
               cam.x + dx, cam.y + dy, cam.z + dz,
               0.0, 1.0, 0.0);
 }
+
+void camera_alternar_modo(void) {
+    if (cam.modo == CAMERA_MODO_LIVRE) {
+        cam.modo = CAMERA_MODO_TOUR;
+        trecho_atual = 0;
+        t_atual = 0.0f;
+    } 
+    else {
+        cam.modo = CAMERA_MODO_LIVRE;
+    }
+}
