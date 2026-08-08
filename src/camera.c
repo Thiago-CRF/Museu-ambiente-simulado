@@ -75,7 +75,7 @@ static void atualizar_modo_livre(float dt) {
         fx /= comprimento; fz /= comprimento; }
 
     // vetor perpendicular (pra direita, pra mover pro lados com A e D)
-    float rx = fz, rz = -fx;
+    float rx = -fz, rz = fx;
     
     // variaveis pra atualizar os valores no final
     float novoX = cam.x;
