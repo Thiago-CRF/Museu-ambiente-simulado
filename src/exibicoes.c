@@ -122,7 +122,7 @@ void desenhar_estatua_T_pose(float x, float y, float z, float altura_total) {
     float alt_pedestal = altura_total * 0.05f; // 5%
     float alt_pernas    = altura_total * 0.50f; // 50%
     float alt_tronco    = altura_total * 0.30f; // 30%
-    float diam_cabeca   = altura_total * 0.15f; // 15% restante
+    float diam_cabeca   = altura_total * 0.15f; // 15%
     float raio_cabeca   = diam_cabeca / 2.0f;
 
     // Configuração dos cilindros das pernas
@@ -132,10 +132,8 @@ void desenhar_estatua_T_pose(float x, float y, float z, float altura_total) {
     float compr_braco   = altura_total * 0.35f;
     float raio_braco    = 0.08f;
     
-    // O retângulo (tronco) terá largura igual à soma dos dois diâmetros
     float largura_retangulo = diam_cilindro * 2.0f; 
 
-    // Inicializa o objeto quádrico da GLU para cilindros e esferas
     GLUquadric* q = gluNewQuadric();
 
     glPushMatrix();
@@ -200,7 +198,7 @@ void desenhar_estatua_T_pose(float x, float y, float z, float altura_total) {
         glPopMatrix();
 
     glPopMatrix();
-    
+
     gluDeleteQuadric(q);
 }
 
