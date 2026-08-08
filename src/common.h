@@ -13,6 +13,11 @@ typedef struct
 #define LARGURA_JANELA 800
 #define ALTURA_JANELA 600
 
+// Constante PI definido para testar se não da bug visual na camera
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 // limites da sala pra colisão simples da camera
 #define SALA_MIN_X -9.5f
 #define SALA_MAX_X 9.5f
