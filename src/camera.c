@@ -117,4 +117,18 @@ static void atualizar_modo_tour(float dt) {
     }
 
     Vetor3 posicao = curva_avaliar(caminho_tour[trecho_atual], t_atual);
+
+    // calcula um ponto um pouco a frente pra saber pra onde olhar
+    float t_frente = t_atual + 0.02f;
+    int trecho_frente = trecho_atual;
+    if (t_frente >= 1.0f) {
+        t_frente -= 1.0f;
+        trecho_frente = (trecho_atual + 1) % NUM_TRECHOS;
+    }
+
+    Vetor3 alvo = curva_avaliar(caminho_tour[trecho_frente], t_frente);
+
+    cam.x = posicao.x;
+    cam.y = posicao.y;
+    cam.z = posicao.z;
 }
