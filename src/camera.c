@@ -20,3 +20,14 @@ static CurvaBezier caminho_tour[NUM_TRECHO];
 static int trecho_atual = 0;
 static float t_atual = 0.0f;
 
+// monta os pontos de controle do circuito do tour
+static void montar_caminho_tour(void) {
+    float y = ALTURA_OLHOS;
+    float r = 6.0f; // raio do circuito
+    float k = 3.31f;    // deslocamento dos pontos de controle (aproxima um circulo)
+
+    caminho_tour[0] = (CurvaBezier){{ r, y, 0}, { r, y, k}, { k, y, r}, { 0, y, r}};
+    caminho_tour[1] = (CurvaBezier){{ 0, y, r}, {-k, y, r}, {-r, y, k}, {-r, y, 0}};
+    caminho_tour[2] = (CurvaBezier){{-r, y, 0}, {-r, y,-k}, {-k, y,-r}, { 0, y,-r}};
+    caminho_tour[3] = (CurvaBezier){{ 0, y,-r}, { k, y,-r}, { r, y,-k}, { r, y, 0}};
+}
