@@ -57,3 +57,43 @@ void camera_iniciar(void) {
     trecho_atual = 0;
     t_atual = 0.0f;
 }
+
+// função de movimentação livre com WASD, e colisão caso chegue na parede
+// float dt: delta tempo
+static void atualizar_modo_livre(float dt) {
+    float dx, dy, dz;   // variaveis q apontam pra onde a camera ta olhando, forward, 
+    // definindo os valores com direcao_camera()
+    direcao_camera(&dx, &dy, &dz);
+
+    // projeta a direcao no plano xz, pra não considerar o y pois se eu andar pra frente olhando pra cima eu voo
+    float fx = dx, fz = dz;
+    // pega o comprimento do vetor
+    float comprimento = sqrtf(fx * fx + fz * fz);
+    // evita divisão por 0 quando ta olhando com pitch 90 graus
+    if (comprimento > 0.0001f) { 
+        // normaliza o vetor, pra o quanto que movimenta depender da velocidade
+        fx /= comprimento; fz /= comprimento; }
+
+    // vetor perpendicular (pra direita, pra mover pro lados com A e D)
+    float rx = fz, rz = -fx;
+    
+    // variaveis pra atualizar os valores no final
+    float novoX = cam.x;
+    float novoZ = cam.z;
+    float passo = VELOCIDADE_MOVIMENTO * dt;
+
+    if (teclas['w'] || teclas['W']) { 
+        novoX += fx * passo; novoZ += fz * passo; 
+    }
+    if (teclas['s'] || teclas['S']) { 
+        novoX -= fx * passo; novoZ -= fz * passo; 
+    }
+    if (teclas['a'] || teclas['A']) { 
+        novoX -= rx * passo; novoZ -= rz * passo; 
+    }
+    if (teclas['d'] || teclas['D']) { 
+        novoX += rx * passo; novoZ += rz * passo; 
+    }
+
+    
+}
