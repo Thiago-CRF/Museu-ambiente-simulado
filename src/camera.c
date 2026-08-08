@@ -195,4 +195,15 @@ void camera_processar_mouse(int x, int y, int largura_janela, int altura_janela)
 
     cam.yaw += desloc_x * SENSIBILIDADE_MOUSE;
     cam.pitch -= desloc_y * SENSIBILIDADE_MOUSE;
+
+    // trava a inclinacao pra nao virar a camera de cabeca pra baixo
+    if (cam.pitch > 89.0f) {
+        cam.pitch = 89.0f;
+    }
+    if (cam.pitch < -89.0f) {
+        cam.pitch = -89.0f;
+    }
+
+    ignorar_prox_mouse = 1;
+    glutWarpPointer(centro_x, centro_y);
 }
