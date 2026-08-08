@@ -151,3 +151,69 @@ void camera_atualizar(float dt){
     atualizar_modo_livre(dt);
 }
 
+void camera_aplicar_visualizacao(void) {
+    // pega pra onde a camera esta olhando e aplica no gluLookAt
+    float dx, dy, dz;
+    direcao_camera(&dx, &dy, &dz);
+
+    gluLookAt(cam.x, cam.y, cam.z,
+              cam.x + dx, cam.y + dy, cam.z + dz,
+              0.0, 1.0, 0.0);
+}
+
+void camera_alternar_modo(void) {
+    if (cam.modo == CAMERA_MODO_LIVRE) {
+        cam.modo = CAMERA_MODO_TOUR;
+        trecho_atual = 0;
+        t_atual = 0.0f;
+    } 
+    else {
+        cam.modo = CAMERA_MODO_LIVRE;
+    }
+}
+
+void camera_processar_mouse(int x, int y, int largura_janela, int altura_janela) {
+    // mouse não controla visao no modo tour
+    if(cam.modo == CAMERA_MODO_TOUR)
+        return;
+
+
+    // processa o ignorar mouse pra quando o modo de camera mudar não ter bug visual
+    if(ignorar_prox_mouse){
+        ignorar_prox_mouse = 0;
+        return;
+    }
+
+    int centro_x = largura_janela / 2;
+    int centro_y = altura_janela / 2;
+
+    int desloc_x = x - centro_x;
+    int desloc_y = y - centro_y;
+
+    if (desloc_x == 0 && desloc_y == 0) 
+        return;
+
+    cam.yaw += desloc_x * SENSIBILIDADE_MOUSE;
+    cam.pitch -= desloc_y * SENSIBILIDADE_MOUSE;
+
+    // trava a inclinacao pra nao virar a camera de cabeca pra baixo
+    if (cam.pitch > 89.0f) {
+        cam.pitch = 89.0f;
+    }
+    if (cam.pitch < -89.0f) {
+        cam.pitch = -89.0f;
+    }
+
+    ignorar_prox_mouse = 1;
+    glutWarpPointer(centro_x, centro_y);
+}
+
+// registram as teclas sendo clicadas e soltas
+
+void camera_tecla_pressionada(unsigned char tecla) {
+    teclas[tecla] = 1;
+}
+
+void camera_tecla_solta(unsigned char tecla) {
+    teclas[tecla] = 0;
+}

@@ -12,4 +12,6 @@ typedef struct {
 // avalia a curva de Bézier cúbica no parâmetro t (0.0 a 1.0)
 Vetor3 curva_avaliar(CurvaBezier curva, float t);
 
+void curva_desenhar(CurvaBezier curva, int num_segmentos);
+
 #endif
