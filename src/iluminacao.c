@@ -22,6 +22,8 @@ typedef struct {
     Ambiente ambiente;
 } LuzMuseu;
 
+static LuzMuseu luzes[NUM_LUZES_MUSEU];
+
 // define onde fica cada luz do museu a ordem importa:
 // quando um ambiente nao couber inteiro nos slots restantes,
 // as luzes do fim da lista dele sao as primeiras a ficarem de fora
@@ -114,7 +116,7 @@ static LuzMuseu luzes[NUM_LUZES_MUSEU];
 void iluminacao_iniciar(){
     glEnable(GL_LIGHTING);
 
-    // faz com que glColor3f contie definindo a cor do material
+    // faz com que glColor3f continue definindo a cor do material
     glEnable(GL_COLOR_MATERIAL);
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
@@ -124,58 +126,41 @@ void iluminacao_iniciar(){
     glMaterialfv(GL_FRONT, GL_SPECULAR, especular_material);
     glMaterialf(GL_FRONT, GL_SHININESS, 20.0f);
 
-    // --- PONTOS DE LUZ
-    // luz 0: iluminaçao geral da sala, pontual no centro
-    GLfloat luz0_ambiente[]  = { 0.25f, 0.25f, 0.25f, 1.0f };
-    GLfloat luz0_difusa[]    = { 0.55f, 0.55f, 0.50f, 1.0f };
-    GLfloat luz0_especular[] = { 0.3f, 0.3f, 0.3f, 1.0f };
+    // luz ambiente global: fica no modelo de iluminacao, e nao numa luz especifica,
+    // pra a cena nao escurecer toda quando os slots trocam de dono entre um ambiente e outro
+    GLfloat ambiente_global[] = { 0.20f, 0.19f, 0.18f, 1.0f };
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambiente_global);
 
-    glLightfv(GL_LIGHT0, GL_AMBIENT, luz0_ambiente);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, luz0_difusa);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, luz0_especular);
-    glEnable(GL_LIGHT0);
-
-    // luz 1: spot quente sobre estatuas no fundo (apenas base, mudar quando mudar as posições)
-    GLfloat luz1_difusa[]    = { 1.0f, 0.9f, 0.7f, 1.0f };
-    GLfloat luz1_especular[] = { 1.0f, 1.0f, 0.9f, 1.0f };
-
-    glLightfv(GL_LIGHT1, GL_DIFFUSE, luz1_difusa);
-    glLightfv(GL_LIGHT1, GL_SPECULAR, luz1_especular);
-    glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 35.0f);
-    glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 8.0f);
-    glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 1.0f);
-    glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.05f);
-    glEnable(GL_LIGHT1);
-
-    // luz 2: spot frio sobre estatuas da frente (tambem apenas exemplo base, mudar quando mudar os itens do museu)
-    GLfloat luz2_difusa[]    = { 0.7f, 0.8f, 1.0f, 1.0f };
-    GLfloat luz2_especular[] = { 0.9f, 0.9f, 1.0f, 1.0f };
-
-    glLightfv(GL_LIGHT2, GL_DIFFUSE, luz2_difusa);
-    glLightfv(GL_LIGHT2, GL_SPECULAR, luz2_especular);
-    glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 35.0f);
-    glLightf(GL_LIGHT2, GL_SPOT_EXPONENT, 8.0f);
-    glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 1.0f);
-    glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 0.05f);
-    glEnable(GL_LIGHT2);
+    montar_luzes();
 }
 
 void iluminacao_atualizar(){
     // as posições sao definidas todo frame porque depende da matriz modelview
     // precisa chamar depois de camera_aplicar_visualizacao()
 
-    // modificar as posições base e adicionar para cada ponto de luz novo
+    // pega a posição da camera e define o ambiente atual dela
+    Vetor3 posicao_camera = camera_obter_posicao();
+    Ambiente amb_atual = ambiente_da_camera(posicao_camera);
 
-    GLfloat posicao_luz0[] = { 0.0f, 5.5f, 0.0f, 1.0f };
-    glLightfv(GL_LIGHT0, GL_POSITION, posicao_luz0);
+    // com base na ordem de ambientes (contando o atual), define a ordem de prioridade das luzes
+    Ambiente amb_ordem[3];
+    ordem_de_prioridade(amb_atual, amb_ordem);
 
-    GLfloat posicao_luz1[]  = { 0.0f, 5.5f, -4.0f, 1.0f };
-    GLfloat direcao_luz1[]  = { 0.0f, -1.0f, 0.0f };
-    glLightfv(GL_LIGHT1, GL_POSITION, posicao_luz1);
-    glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, direcao_luz1);
+    int slots_usados = 0;
 
-    GLfloat posicao_luz2[]  = { 0.0f, 5.5f, 4.0f, 1.0f };
-    GLfloat direcao_luz2[]  = { 0.0f, -1.0f, 0.0f };
-    glLightfv(GL_LIGHT2, GL_POSITION, posicao_luz2);
-    glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, direcao_luz2);
+    // percorre os ambientes por prioridade e vai ocupando os slots disponiveis com as luzes
+    for (int a = 0; a < 3 && slots_usados < MAX_LUZES_GL; a++) {
+        for (int i = 0; i < NUM_LUZES_MUSEU && slots_usados < MAX_LUZES_GL; i++) {
+            if (luzes[i].ambiente == amb_ordem[a]) {
+                // GL_LIGHT0 + n e garantido pelo opengl como sendo o slot n
+                aplicar_luz(GL_LIGHT0 + slots_usados, luzes[i]);
+                slots_usados++;
+            }
+        }
+    }
+
+    // desliga os slots que sobraram, pra não ficar com a luz do frame anterior
+    for (int s = slots_usados; s < MAX_LUZES_GL; s++) {
+        glDisable(GL_LIGHT0 + s);
+    }
 }
