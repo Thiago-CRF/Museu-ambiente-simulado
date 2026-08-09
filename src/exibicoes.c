@@ -216,8 +216,86 @@ void desenhar_estatua_T_pose(float x, float y, float z, float altura_total) {
     gluDeleteQuadric(q);
 }
 
+// desenha uma luminaria articulada de parede no estilo Pixar
+static void desenhar_luminaria(GLenum luzAtual) {
+    glColor3f(0.1f, 0.1f, 0.1f); // Preto fosco para o metal
+
+    glPushMatrix();
+        // 1. Base colada na parede
+        glPushMatrix();
+            glScalef(0.15f, 0.15f, 0.05f);
+            glutSolidSphere(1.0, 15, 15);
+        glPopMatrix();
+
+        // 2. Primeiro Braço
+        glRotatef(-45.0f, 1.0f, 0.0f, 0.0f); 
+        
+        glPushMatrix();
+            glTranslatef(0.0f, 0.0f, 0.3f); 
+            glScalef(0.04f, 0.04f, 0.6f);   
+            glutSolidCube(1.0);
+        glPopMatrix();
+
+        glTranslatef(0.0f, 0.0f, 0.6f);
+
+        // 3. Articulação (Cotovelo)
+        glPushMatrix();
+            glScalef(0.06f, 0.06f, 0.06f);
+            glutSolidSphere(1.0, 10, 10);
+        glPopMatrix();
+
+        // 4. Segundo Braço
+        glRotatef(100.0f, 1.0f, 0.0f, 0.0f); 
+        
+        glPushMatrix();
+            glTranslatef(0.0f, 0.0f, 0.3f);
+            glScalef(0.04f, 0.04f, 0.6f);
+            glutSolidCube(1.0);
+        glPopMatrix();
+
+        glTranslatef(0.0f, 0.0f, 0.6f);
+
+        // 5. Articulação do bocal
+        glPushMatrix();
+            glScalef(0.06f, 0.06f, 0.06f);
+            glutSolidSphere(1.0, 10, 10);
+        glPopMatrix();
+
+        // 6. Cúpula (Cone invertido)
+        glRotatef(60.0f, 1.0f, 0.0f, 0.0f); 
+        
+        glPushMatrix();
+            glTranslatef(0.0f, 0.0f, 0.2f);
+            glRotatef(180.0f, 1.0f, 0.0f, 0.0f); 
+            glutSolidCone(0.18, 0.2, 15, 15);
+        glPopMatrix();
+
+        // 7. Lâmpada (Bolinha) e Luz Real (Holofote)
+        GLfloat posLuz[] = { 0.0f, 0.0f, 0.2f, 1.0f }; 
+        GLfloat dirLuz[] = { 0.0f, 0.0f, 1.0f };       
+        
+        // Define a luz na matriz atual do cone
+        glLightfv(luzAtual, GL_POSITION, posLuz);
+        glLightfv(luzAtual, GL_SPOT_DIRECTION, dirLuz);
+
+        // Desenha a bolinha com brilho próprio (Emissão)
+        glPushMatrix();
+            glTranslatef(posLuz[0], posLuz[1], posLuz[2]); 
+            
+            GLfloat corAcesa[] = { 1.0f, 1.0f, 0.8f, 1.0f };   
+            GLfloat corApagada[] = { 0.0f, 0.0f, 0.0f, 1.0f }; 
+            
+            glMaterialfv(GL_FRONT, GL_EMISSION, corAcesa);
+            glutSolidSphere(0.07, 10, 10);
+            glMaterialfv(GL_FRONT, GL_EMISSION, corApagada); // Desliga!
+            
+        glPopMatrix();
+
+    glPopMatrix();
+}
+
 // desenha um quadro com moldura encostado na parede
-static void desenhar_quadro(Quadro q) {
+static void desenhar_quadro(Quadro q, GLenum luzAtual) {
     glPushMatrix();
         glTranslatef(q.posicao.x, q.posicao.y, q.posicao.z);
         glRotatef(q.rotacaoY, 0.0f, 1.0f, 0.0f);
@@ -253,6 +331,16 @@ static void desenhar_quadro(Quadro q) {
         if (q.texturaQuadro != 0) {
             glDisable(GL_TEXTURE_2D);
         }
+
+        // ==========================================
+        // LUMINÁRIA ACIMA DO QUADRO
+        // ==========================================
+        glPushMatrix();
+            // Desloca para cima baseando-se na altura da tela (meiaA) + uma margem
+            glTranslatef(0.0f, meiaA + 0.35f, 0.0f); 
+            desenhar_luminaria(luzAtual); // <-- Passa a luz para a luminária
+        glPopMatrix();
+
     glPopMatrix();
 }
 
@@ -294,14 +382,18 @@ void desenhar_objeto(Objetos obj) {
 }
 
 void exponatos_desenhar(void) {
+    // Desenha as estátuas
     for (int i = 0; i < NUM_ESTATUAS-1; i++) {
         desenhar_estatua(estatuas[i]);
     }
 
+    // Desenha a estátua especial na última posição
     desenhar_estatua_T_pose(estatuas[3].posicao.x, estatuas[3].posicao.y, estatuas[3].posicao.z, 2.0f);
 
+    // Desenha os quadros enviando um ID de luz progressivo
     for (int i = 0; i < NUM_QUADROS; i++) {
-        desenhar_quadro(quadros[i]);
+        // Envia GL_LIGHT1 pro primeiro quadro, GL_LIGHT2 pro segundo, etc.
+        desenhar_quadro(quadros[i], GL_LIGHT1 + i); 
     }
 
     for (int i = 0; i < NUM_OBJETOS; i++) {
