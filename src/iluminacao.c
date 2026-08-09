@@ -4,7 +4,7 @@
 #include "common.h"
 #include "camera.h"
 
-#define NUM_LUZES_MUSEU 9   // 4 spots de estatua + 3 do corredor + 2 lustres
+#define NUM_LUZES_MUSEU 14   // 4 spots de estatua + 3 do corredor + 2 lustres + 5 spots sala
 #define MAX_LUZES_GL 8  // o opengl 2.1 so tem o GL_LIGHT0 ate GL_LIGHT7
 
 // medidas do objeto que representa cada spot (apenas para desenhar)
@@ -48,8 +48,18 @@ static void montar_luzes(void) {
     luzes[6] = (LuzMuseu){ {0.0f, 3.9f, 0.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_CORREDOR };
     luzes[7] = (LuzMuseu){ {3.3f, 3.9f, 0.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_CORREDOR };
 
-    // sala 2: por enquanto so o lustre, os spots dos quadros vão ser feitos depois (talvez não sejam individuais)
+    // sala 2: lustre vem antes para não ser cortado
     luzes[8] = (LuzMuseu){ {15.0f, 6.0f, 0.0f}, {0.0f, -1.0f, 0.0f}, 0, AMBIENTE_SALA2 };
+
+    // spots da sala 2, um perto do meio de cada parede, apontando reto pra baixo
+    // ficam a 3 unidades da parede, entao o circulo de luz no chao encosta nela
+    luzes[9]  = (LuzMuseu){ {15.0f, 6.9f, -7.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_SALA2 }; // parede do fundo (-z)
+    luzes[10] = (LuzMuseu){ {15.0f, 6.9f, 7.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_SALA2 }; // parede da frente (+z)
+    luzes[11] = (LuzMuseu){ {22.0f, 6.9f, 0.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_SALA2 }; // parede da direita (+x)
+    // parede da esquerda (-x): dois spots, um sobre cada quadro, ja que o corredor ocupa o meio da parede
+    // e tem 2 quadros um de cada lado
+    luzes[12] = (LuzMuseu){ {6.7f, 6.9f, -6.5f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_SALA2 };
+    luzes[13] = (LuzMuseu){ {6.7f, 6.9f, 6.5f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_SALA2 };
 }
 
 // joga os parametros de uma luz do museu num slot do opengl
