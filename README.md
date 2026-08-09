@@ -7,6 +7,9 @@ Projeto final da matéria de introdução à copmutação gráfica - UFPB
 ## Demonstração
 ![Demonstração da navegação livre](media/demo.gif)
 
+Modo tour automatico (T):
+https://github.com/user-attachments/assets/8ebb57ad-df6e-4977-b4ee-fa430ba52740
+
 ## Integrantes do grupo
 - Thiago César
 - José Roberto
@@ -22,7 +25,7 @@ O usuário pode:
 
 Desenvolvido usando C puro, com OpenGL 2.1 e GLUT/freeglut
 
-## Deoendências
+## Dependências
 - `gcc` e GNU Make
 - OpenGL 2.1
 - `GLUT` ou `freeglut`
