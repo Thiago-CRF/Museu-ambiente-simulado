@@ -287,7 +287,6 @@ void desenhar_objeto(Objetos obj) {
             glTexCoord2f(0.0f, 1.0f); glVertex3f(0.0f, obj.altura, -meioL);
         glEnd();
 
-        // 3. DESATIVA OS RECURSOS (Boa prática para não avacalhar os outros objetos)
         glDisable(GL_TEXTURE_2D);
         glDisable(GL_BLEND);
 
@@ -308,4 +307,4 @@ void exponatos_desenhar(void) {
     for (int i = 0; i < NUM_OBJETOS; i++) {
         desenhar_objeto(objetos[i]);
     }
-}
+};
