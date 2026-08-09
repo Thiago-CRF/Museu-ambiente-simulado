@@ -7,6 +7,11 @@
 #define NUM_QUADROS  7
 #define NUM_OBJETOS  2
 
+// medidas da fonte do meio da sala de quadros
+#define FONTE_RAIO_BACIA    0.85f
+#define FONTE_ALTURA_BACIA  0.34f
+#define FONTE_BORDA_BACIA   0.07f  // parede fina, de peçaa decorativa
+
 // tipos de escultura da sala 1, cada um com sua funcao de desenho
 typedef enum {
     ESTATUA_GENERICA,
@@ -534,6 +539,112 @@ void desenhar_objeto(Objetos obj) {
     glPopMatrix();
 }
 
+// desenha uma fonte decorativa seca, em pedra clara: base baixa, bacia rasa,
+// coluna fina e uma taca no topo
+static void desenhar_fonte(float x, float z) {
+    GLUquadric *q = gluNewQuadric();
+
+    float raio_interno = FONTE_RAIO_BACIA - FONTE_BORDA_BACIA;
+
+    glPushMatrix();
+        glTranslatef(x, 0.0f, z);
+
+        // marmore claro, levemente azulado
+        glColor3f(0.90f, 0.91f, 0.93f);
+
+        // degrau da base, um pouco mais largo que a bacia
+        // o gluCylinder cresce no eixo z, entao gira pra ele subir no y
+        glPushMatrix();
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluCylinder(q, 0.98, 0.94, 0.12, 28, 1);
+        glPopMatrix();
+
+        // disco de baixo da fonte
+        glPushMatrix();
+            glTranslatef(0.0f, 0.12f, 0.0f);
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluDisk(q, 0.0, 0.94, 28, 2);
+        glPopMatrix();
+
+        // parede externa da bacia
+        glPushMatrix();
+            glTranslatef(0.0f, 0.12f, 0.0f);
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluCylinder(q, FONTE_RAIO_BACIA, FONTE_RAIO_BACIA, FONTE_ALTURA_BACIA, 28, 2);
+        glPopMatrix();
+
+        // parede interna, vista por dentro da bacia
+        // o GLU_INSIDE inverte as normais, senao essa face fica escura
+        glPushMatrix();
+            glTranslatef(0.0f, 0.12f, 0.0f);
+            gluQuadricOrientation(q, GLU_INSIDE);
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluCylinder(q, raio_interno, raio_interno, FONTE_ALTURA_BACIA, 28, 2);
+            gluQuadricOrientation(q, GLU_OUTSIDE); // volta ao padrao
+        glPopMatrix();
+
+        // borda de cima: anel entre o raio interno e o externo
+        glPushMatrix();
+            glTranslatef(0.0f, 0.12f + FONTE_ALTURA_BACIA, 0.0f);
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluDisk(q, raio_interno, FONTE_RAIO_BACIA, 28, 1);
+        glPopMatrix();
+
+        // fundo da bacia, agora aparente porque nao tem agua
+        glPushMatrix();
+            glTranslatef(0.0f, 0.18f, 0.0f);
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluDisk(q, 0.0, raio_interno, 28, 4);
+        glPopMatrix();
+
+        // coluna fina, subindo do fundo da bacia
+        glPushMatrix();
+            glTranslatef(0.0f, 0.18f, 0.0f);
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluCylinder(q, 0.15, 0.11, 1.25, 20, 4);
+        glPopMatrix();
+
+        // taça do topo: abre pra cima, tambem de parede fina
+        glPushMatrix();
+            glTranslatef(0.0f, 1.43f, 0.0f);
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluCylinder(q, 0.11, 0.46, 0.24, 24, 2);
+        glPopMatrix();
+
+        // interior da taça, com as normais invertidas pelo mesmo motivo da bacia
+        glPushMatrix();
+            glTranslatef(0.0f, 1.45f, 0.0f);
+            gluQuadricOrientation(q, GLU_INSIDE);
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluCylinder(q, 0.09, 0.42, 0.22, 24, 2);
+            gluQuadricOrientation(q, GLU_OUTSIDE);
+        glPopMatrix();
+
+        // fundo da taça
+        glPushMatrix();
+            glTranslatef(0.0f, 1.45f, 0.0f);
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluDisk(q, 0.0, 0.11, 20, 1);
+        glPopMatrix();
+
+        // pilar central da fonte
+        glPushMatrix();
+            glTranslatef(0.0f, 1.60f, 0.0f);
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluCylinder(q, 0.06, 0.05, 0.22, 14, 1);
+        glPopMatrix();
+
+        // esfera no fim do pila, entao ela engole a ponta da haste
+        glPushMatrix();
+            glTranslatef(0.0f, 1.82f, 0.0f);
+            glutSolidSphere(0.08, 14, 14);
+        glPopMatrix();
+
+    glPopMatrix();
+
+    gluDeleteQuadric(q);
+}
+
 void exponatos_desenhar(void) {
     // cada estatua diz qual funcao a desenha, entao adicionar um modelo novo
     // é so criar a funcao e mais um caso aqui se colocar outra escultura diferente
@@ -564,4 +675,7 @@ void exponatos_desenhar(void) {
     for (int i = 0; i < NUM_OBJETOS; i++) {
         desenhar_objeto(objetos[i]);
     }
+
+    // fonte no meio da sala dos quadros
+    desenhar_fonte(15.0f, 0.0f);
 };
