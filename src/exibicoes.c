@@ -7,9 +7,18 @@
 #define NUM_QUADROS  7
 #define NUM_OBJETOS  2
 
+// tipos de escultura da sala 1, cada um com sua funcao de desenho
+typedef enum {
+    ESTATUA_GENERICA,
+    ESTATUA_T_POSE,
+    ESTATUA_LIBERDADE,
+    ESTATUA_ESPADA
+} TipoEstatua;
+
 typedef struct {
     Vetor3 posicao;
     float corR, corG, corB;
+    TipoEstatua tipo;
 } Estatua;
 
 typedef struct {
@@ -34,10 +43,10 @@ void exponatos_iniciar(void) {
 
     // SALA 1 (Esquerda): Apenas Esculturas
     // Centro da sala é em X = -15.0
-    estatuas[0] = (Estatua){ { -19.0f, 0.0f, -4.0f }, 0.80f, 0.75f, 0.65f };
-    estatuas[1] = (Estatua){ { -11.0f, 0.0f, -4.0f }, 0.70f, 0.55f, 0.35f };
-    estatuas[2] = (Estatua){ { -19.0f, 0.0f,  4.0f }, 0.60f, 0.65f, 0.70f };
-    estatuas[3] = (Estatua){ { -11.0f, 0.0f,  4.0f }, 0.85f, 0.80f, 0.55f };
+    estatuas[0] = (Estatua){ { -19.0f, 0.0f, -4.0f }, 0.80f, 0.75f, 0.65f, ESTATUA_ESPADA };
+    estatuas[1] = (Estatua){ { -11.0f, 0.0f, -4.0f }, 0.70f, 0.55f, 0.35f, ESTATUA_GENERICA };
+    estatuas[2] = (Estatua){ { -19.0f, 0.0f,  4.0f }, 0.40f, 0.70f, 0.62f, ESTATUA_LIBERDADE };
+    estatuas[3] = (Estatua){ { -11.0f, 0.0f,  4.0f }, 0.85f, 0.80f, 0.55f, ESTATUA_T_POSE };
 
     // SALA 2 (Direita): Apenas Quadros
     // Centro da sala é em X = 15.0
