@@ -234,6 +234,57 @@ static void desenhar_estatua_liberdade(Estatua e) {
     glPopMatrix();
 }
 
+// escultura de uma espada cravada no pedestal, com a lamina apontando pra baixo
+static void desenhar_escultura_espada(Estatua e) {
+    glPushMatrix();
+        glTranslatef(e.posicao.x, e.posicao.y, e.posicao.z);
+
+        desenhar_pedestal();
+
+        // lamina: cubo achatado no eixo z pra virar uma chapa fina
+        glColor3f(0.75f, 0.78f, 0.82f);
+        glPushMatrix();
+            glTranslatef(0.0f, 1.75f, 0.0f);
+            glScalef(0.22f, 1.5f, 0.05f);
+            glutSolidCube(1.0);
+        glPopMatrix();
+
+        // ponta da lamina, entrando no pedestal
+        glPushMatrix();
+            glTranslatef(0.0f, 1.05f, 0.0f);
+            // a escala vem antes da rotacao na pilha, entao ela achata o cone
+            // depois que ele ja esta virado pra baixo, acompanhando a lamina
+            glScalef(1.0f, 1.0f, 0.23f);
+            glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+            glutSolidCone(0.11, 0.30, 12, 1);
+        glPopMatrix();
+
+        // guarda, cabo e pomo usam a cor da escultura
+        glColor3f(e.corR, e.corG, e.corB);
+
+        // guarda transversal
+        glPushMatrix();
+            glTranslatef(0.0f, 2.55f, 0.0f);
+            glScalef(0.75f, 0.10f, 0.12f);
+            glutSolidCube(1.0);
+        glPopMatrix();
+
+        // cabo
+        glPushMatrix();
+            glTranslatef(0.0f, 2.82f, 0.0f);
+            glScalef(0.10f, 0.45f, 0.10f);
+            glutSolidCube(1.0);
+        glPopMatrix();
+
+        // pomo na ponta do cabo
+        glPushMatrix();
+            glTranslatef(0.0f, 3.10f, 0.0f);
+            glutSolidSphere(0.11, 14, 14);
+        glPopMatrix();
+
+    glPopMatrix();
+}
+
 void desenhar_estatua_T_pose(float x, float y, float z, float altura_total) {
     float alt_pedestal = altura_total * 0.05f; // 5%
     float alt_pernas    = altura_total * 0.50f; // 50%
