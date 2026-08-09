@@ -7,6 +7,12 @@
 #define NUM_LUZES_MUSEU 9   // 4 spots de estatua + 3 do corredor + 2 lustres
 #define MAX_LUZES_GL 8  // o opengl 2.1 so tem o GL_LIGHT0 ate GL_LIGHT7
 
+// medidas do objeto que representa cada spot (apenas para desenhar)
+// as luzes ficam 0.1 abaixo do teto, entao a caixa preenche essa folga
+#define SPOT_LADO_CAIXA    0.5f // tamanho do quadrado do spot
+#define SPOT_ALTURA_CAIXA  0.12f // altura do quadrado do spot
+#define SPOT_RAIO_LAMPADA  0.16f // raio da lampada do spot
+
 // ambientes do museu, usados pra decidir quais luzes ficam acesas
 typedef enum {
     AMBIENTE_SALA1,
@@ -32,15 +38,15 @@ static void montar_luzes(void) {
     luzes[0] = (LuzMuseu){ { -15.0f, 6.0f, 0.0f }, { 0.0f, -1.0f, 0.0f }, 0, AMBIENTE_SALA1 };
 
     // spots de cada estatua, nas mesmas posicoes x/z usadas em exibicoes.c
-    luzes[1] = (LuzMuseu){ {-19.0f, 5.5f, -4.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_SALA1 };
-    luzes[2] = (LuzMuseu){ {-11.0f, 5.5f, -4.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_SALA1 };
-    luzes[3] = (LuzMuseu){ {-19.0f, 5.5f, 4.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_SALA1 };
-    luzes[4] = (LuzMuseu){ {-11.0f, 5.5f, 4.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_SALA1 };
+    luzes[1] = (LuzMuseu){ {-19.0f, 6.9f, -4.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_SALA1 };
+    luzes[2] = (LuzMuseu){ {-11.0f, 6.9f, -4.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_SALA1 };
+    luzes[3] = (LuzMuseu){ {-19.0f, 6.9f, 4.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_SALA1 };
+    luzes[4] = (LuzMuseu){ {-11.0f, 6.9f, 4.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_SALA1 };
 
     // spots do corredor, mais baixos porque o pe-direito ali e menor
-    luzes[5] = (LuzMuseu){ {-3.3f, 3.6f, 0.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_CORREDOR };
-    luzes[6] = (LuzMuseu){ {0.0f, 3.6f, 0.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_CORREDOR };
-    luzes[7] = (LuzMuseu){ {3.3f, 3.6f, 0.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_CORREDOR };
+    luzes[5] = (LuzMuseu){ {-3.3f, 3.9f, 0.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_CORREDOR };
+    luzes[6] = (LuzMuseu){ {0.0f, 3.9f, 0.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_CORREDOR };
+    luzes[7] = (LuzMuseu){ {3.3f, 3.9f, 0.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_CORREDOR };
 
     // sala 2: por enquanto so o lustre, os spots dos quadros vão ser feitos depois (talvez não sejam individuais)
     luzes[8] = (LuzMuseu){ {15.0f, 6.0f, 0.0f}, {0.0f, -1.0f, 0.0f}, 0, AMBIENTE_SALA2 };
@@ -56,7 +62,7 @@ static void aplicar_luz(GLenum slot, LuzMuseu luz) {
 
     if (luz.e_spot) {
         // luz quente dos holofotes
-        GLfloat difusa[]    = { 1.00f, 0.85f, 0.60f, 1.0f };
+        GLfloat difusa[]    = { 1.20f, 1.0f, 0.70f, 1.0f };
         GLfloat especular[] = { 1.00f, 0.95f, 0.85f, 1.0f };
         GLfloat direcao[]   = { luz.direcao.x, luz.direcao.y, luz.direcao.z };
 
@@ -78,7 +84,7 @@ static void aplicar_luz(GLenum slot, LuzMuseu luz) {
         glLightf(slot, GL_SPOT_CUTOFF, 180.0f);  // 180 desliga o cone e vira pontual
         glLightf(slot, GL_SPOT_EXPONENT, 0.0f);
         glLightf(slot, GL_CONSTANT_ATTENUATION, 1.0f);
-        glLightf(slot, GL_LINEAR_ATTENUATION, 0.02f);
+        glLightf(slot, GL_LINEAR_ATTENUATION, 0.05f);
     }
 
     glEnable(slot);
@@ -111,7 +117,51 @@ static void ordem_de_prioridade(Ambiente atual, Ambiente ordem[3]) {
     }
 }
 
-static LuzMuseu luzes[NUM_LUZES_MUSEU];
+// desenha o corpo de um spot: uma caixa preta com uma lampada redonda embaixo
+static void desenhar_corpo_spot(Vetor3 posicao) {
+    GLUquadric *q = gluNewQuadric();
+
+    glPushMatrix();
+        glTranslatef(posicao.x, posicao.y, posicao.z);
+
+        // caixa preta do suporte, deslocada pra cima pra encostar no teto
+        glColor3f(0.08f, 0.08f, 0.08f);
+        glPushMatrix();
+            glTranslatef(0.0f, SPOT_ALTURA_CAIXA / 2.0f - 0.02f, 0.0f);
+            glScalef(SPOT_LADO_CAIXA, SPOT_ALTURA_CAIXA, SPOT_LADO_CAIXA);
+            glutSolidCube(1.0);
+        glPopMatrix();
+
+        // lampada é só um disco com emissao, logo abaixo da face de baixo da caixa
+        GLfloat emissao[] = { 1.0f, 0.95f, 0.85f, 1.0f };
+        glMaterialfv(GL_FRONT, GL_EMISSION, emissao);
+
+        glColor3f(1.0f, 1.0f, 1.0f);
+        glPushMatrix();
+            glTranslatef(0.0f, -0.03f, 0.0f);
+            // o gluDisk fica no plano z = 0 com a normal em +z, entao gira pra
+            // essa normal apontar pra baixo e o disco ser visto de baixo
+            glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+            gluDisk(q, 0.0, SPOT_RAIO_LAMPADA, 24, 1);
+        glPopMatrix();
+
+        // reset pois o glMaterialfv persiste e deixaria tudo brilhando depois
+        GLfloat sem_emissao[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        glMaterialfv(GL_FRONT, GL_EMISSION, sem_emissao);
+
+    glPopMatrix();
+
+    gluDeleteQuadric(q);
+}
+
+// desenha o corpo de todos os spots, nas mesmas posicoes das luzes
+void iluminacao_desenhar_spots(void) {
+    for (int i = 0; i < NUM_LUZES_MUSEU; i++) {
+        if (luzes[i].e_spot) {
+            desenhar_corpo_spot(luzes[i].posicao);
+        }
+    }
+}
 
 void iluminacao_iniciar(){
     glEnable(GL_LIGHTING);
@@ -167,5 +217,10 @@ void iluminacao_atualizar(){
                 slots_usados++;
             }
         }
+    }
+
+    // desliga os slots que sobraram, senao ficam acesos com a luz do frame anterior
+    for (int s = slots_usados; s < MAX_LUZES_GL; s++) {
+        glDisable(GL_LIGHT0 + s);
     }
 }

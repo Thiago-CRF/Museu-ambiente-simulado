@@ -8,6 +8,12 @@
 // pontos suficientes pra registrar o brilho embaixo das luzes
 #define SUBDIVISOES_QUAD 12
 
+// medidas dos lustres principais das salas
+// a luz de cada sala esta em y = 6.0, entao a cupula fica em volta dessa altura
+#define LUSTRE_ALTURA_CUPULA  5.7f   // centro da meia esfera
+#define LUSTRE_RAIO_CUPULA    1.2f
+#define LUSTRE_RAIO_CABO      0.04f
+
 static GLuint texturaPiso = 0;
 static GLuint texturaParede = 0;
 static GLuint texturaTeto = 0;
@@ -72,6 +78,54 @@ glBegin(GL_QUADS);
     if (textura != 0) {
         glDisable(GL_TEXTURE_2D);
     }
+}
+
+// desenha um lustre em formato de cogumelo: um cabo fino descendo do teto
+// e uma meia esfera virada pra baixo, que é a parte que parece acesa
+static void desenhar_lustre(float x, float z, float altura_teto) {
+    GLUquadric *q = gluNewQuadric();
+
+    glPushMatrix();
+        glTranslatef(x, 0.0f, z);
+
+        // cabo
+        // material comum, sem emissao, pra ele nao parecer aceso
+        glColor3f(0.15f, 0.15f, 0.15f);
+        glPushMatrix();
+            glTranslatef(0.0f, LUSTRE_ALTURA_CUPULA, 0.0f);
+            // o gluCylinder cresce no eixo z, entao gira pra ele subir no y
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            gluCylinder(q, LUSTRE_RAIO_CABO, LUSTRE_RAIO_CABO,
+                        altura_teto - LUSTRE_ALTURA_CUPULA, 12, 1);
+        glPopMatrix();
+
+        // cogumelo do lustre
+        // o plano de corte descarta tudo que fica acima do centro da esfera,
+        // deixando so a metade de baixo, que da o formato de cogumelo
+        // a equacao é ax + by + cz + d = 0, entao (0,-1,0,y) mantem o lado y < centro
+        GLdouble plano_corte[] = { 0.0, -1.0, 0.0, LUSTRE_ALTURA_CUPULA };
+        glClipPlane(GL_CLIP_PLANE0, plano_corte);
+        glEnable(GL_CLIP_PLANE0);
+
+        // emissao faz o material brilhar com cor propria, independente das luzes
+        GLfloat emissao[] = { 0.8f, 0.85f, 0.72f, 1.0f };
+        glMaterialfv(GL_FRONT, GL_EMISSION, emissao);
+
+        glColor3f(1.0f, 0.97f, 0.90f);
+        glPushMatrix();
+            glTranslatef(0.0f, LUSTRE_ALTURA_CUPULA, 0.0f);
+            glutSolidSphere(LUSTRE_RAIO_CUPULA, 24, 24);
+        glPopMatrix();
+
+        // reset pois o glMaterialfv persiste e deixaria tudo brilhando depois
+        GLfloat sem_emissao[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        glMaterialfv(GL_FRONT, GL_EMISSION, sem_emissao);
+
+        glDisable(GL_CLIP_PLANE0);
+
+    glPopMatrix();
+
+    gluDeleteQuadric(q);
 }
 
 void cena_desenhar(void) {
@@ -188,4 +242,8 @@ void cena_desenhar(void) {
     desenhar_quad(texturaParede, 1.0f, 1.0f, 0.0f, 0.0f,
                   S2_XMIN, ALTURA_CORREDOR, C_ZMAX,  S2_XMIN, ALTURA_CORREDOR, C_ZMIN,
                   S2_XMIN, ALTURA_SALA, C_ZMIN,  S2_XMIN, ALTURA_SALA, C_ZMAX);
+
+    // lustres principais da sala
+    desenhar_lustre(-15.0f, 0.0f, ALTURA_SALA); // sala 1
+    desenhar_lustre( 15.0f, 0.0f, ALTURA_SALA); // sala 2
 }
