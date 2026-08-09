@@ -345,3 +345,8 @@ void camera_tecla_pressionada(unsigned char tecla) {
 void camera_tecla_solta(unsigned char tecla) {
     teclas[tecla] = 0;
 }
+
+Vetor3 camera_obter_posicao(void) {
+    Vetor3 posicao = { cam.x, cam.y, cam.z };
+    return posicao;
+}
