@@ -69,9 +69,9 @@ static void aplicar_luz(GLenum slot, LuzMuseu luz) {
         glLightf(slot, GL_LINEAR_ATTENUATION, 0.08f);
     }
     else {
-        // lustre: luz pontual, quente mas mais fraca e espalhada
-        GLfloat difusa[]    = { 0.90f, 0.85f, 0.72f, 1.0f };
-        GLfloat especular[] = { 0.40f, 0.40f, 0.35f, 1.0f };
+        // lustre: luz pontual, fria e mais fraca e espalhada (luz principal da sala)
+        GLfloat difusa[]    = { 0.50f, 0.50f, 0.50f, 1.0f };
+        GLfloat especular[] = { 0.30f, 0.30f, 0.30f, 1.0f };
 
         glLightfv(slot, GL_DIFFUSE, difusa);
         glLightfv(slot, GL_SPECULAR, especular);
@@ -148,19 +148,24 @@ void iluminacao_atualizar(){
 
     int slots_usados = 0;
 
-    // percorre os ambientes por prioridade e vai ocupando os slots disponiveis com as luzes
+
+    // os lustres entram primeiro, independente do ambiente: como o opengl nao
+    // projeta sombras, eles iluminam o museu inteiro e servem de preenchimento
+    // geral, entao deixar um de fora escurece a sala que perdeu o slot
+    for (int i = 0; i < NUM_LUZES_MUSEU && slots_usados < MAX_LUZES_GL; i++) {
+        if (!luzes[i].e_spot) {
+            aplicar_luz(GL_LIGHT0 + slots_usados, luzes[i]);
+            slots_usados++;
+        }
+    }
+
+    // os spots ocupam o que sobrou, comecando pelo ambiente onde a camera esta
     for (int a = 0; a < 3 && slots_usados < MAX_LUZES_GL; a++) {
         for (int i = 0; i < NUM_LUZES_MUSEU && slots_usados < MAX_LUZES_GL; i++) {
-            if (luzes[i].ambiente == amb_ordem[a]) {
-                // GL_LIGHT0 + n e garantido pelo opengl como sendo o slot n
+            if (luzes[i].e_spot && luzes[i].ambiente == amb_ordem[a]) {
                 aplicar_luz(GL_LIGHT0 + slots_usados, luzes[i]);
                 slots_usados++;
             }
         }
-    }
-
-    // desliga os slots que sobraram, pra não ficar com a luz do frame anterior
-    for (int s = slots_usados; s < MAX_LUZES_GL; s++) {
-        glDisable(GL_LIGHT0 + s);
     }
 }
