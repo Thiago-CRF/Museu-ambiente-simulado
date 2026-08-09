@@ -65,14 +65,34 @@ O `Makefile` compila usando `gcc`, linkando `-lGL -lGLU -lglut -lm` do OpenGL e 
 
 ## Principais problemas encontrados
 
+- Limite de 8 luzes do OpenGL. O museu tem 14 fontes de luz posicionadas (2 lustres, 4 spots das estátuas, 3 do corredor e 5 spots da sala 2), mas o OpenGL 2.1 só tem 8 slots (`GL_LIGHT0` a `GL_LIGHT7`). Foi preciso criar um sistema de alocação dinâmica em `iluminacao_atualizar()`, que identifica em qual ambiente a câmera está e distribui os slots por prioridade: os dois lustres são sempre alocados primeiro, e os restantes vão para os spots do ambiente atual e dos ambientes vizinhos. Também foi necessário desabilitar explicitamente os slots que sobram, senão luzes de uma alocação anterior continuavam acesas em posições erradas.
+
+- Artefatos de iluminação por vértice. O OpenGL 2.1 calcula a iluminação por vértice e interpola, então um piso ou parede feito de um único quad tinha apenas 4 vértices calcular a iluminação, o resultado era iluminação chapada e com faixas visíveis, com o círculo de luz dos spots sem aparecer. A solução foi dividir a geometria dos quads em uma grade 12×12 (`SUBDIVISOES_QUAD`), aumentando a densidade de vértices pra melhorar a amostragem da luz.
+
+- Evaluators do OpenGL não retornam dados para a aplicação. Como as curvas de Bézier com `glMap1f` / `glEvalCoord1f` foram feitas para *desenhar* a curva dentro de um `glBegin/glEnd`, ela não devolve o ponto avaliado como valor pro código. Como a câmera precisa da posição em `t` como dado (para passar ao `gluLookAt`), foi preciso implementar `curva_avaliar()` manualmente com a forma polinomial de Bernstein.
+
+- Colisão em ambiente não-retangular. O museu tem duas salas ligadas por um corredor, então uma colisão simples nos limites de uma caixa não funciona. Foi preciso definir regiões retangulares navegáveis e testar a colisão eixo a eixo (X e Z separadamente)..
+
+- Houveram vários erros pequenos de iluminação e de cor quando implementado as estátuas e os quadros, que foram corrigidos com testes, mudando os parametros de luz e cor.
+
 - Na movimentação da câmera no começo teve um pequeno bug de que a câmera voava quando olhava para cima, pois não tinhamos travado a movimentação no plano vertical.
+
 - Quando foi implementado a normalização de vetores no modo livre da câmera, foi preciso um guarda contra divisão por zero, pois enquanto movimenta a camera o vetor direção chega a um valor módulo muito próximo de 0.
+
 - Por conta de `stb_image.h` ser uma biblioteca header-only, foi preciso definir `STB_IMAGE_IMPLEMENTATION` somente em um arquivo `.c`. Pois quando definido em mais de um acontece erro de linkagem
 
 ## O que pode ser melhorado
 
 - Adicionar fontes de luz dinâmicas e exibições dinâmicas, que se movem pela cena
+
+- Sincronizar corpo do spot com a luz alocada. Como `iluminacao_desenhar_spots()` percorre o array inteiro sem checar quais luzes realmente receberam slot, aparecem lâmpadas com `GL_EMISSION` aceso no teto mesmo quando a luz dela está desligada. Seria fazer uma função que identifica isso e muda o `GL_EMISSION` quando desenhar a luz a cada quadro.
+
+- Implementar sombras, os objetos são iluminados, mas não bloqueiam luz. Daria para fazer sombras projetadas por matriz de projeção no plano do chão, ou shadow mapping.
+
 - Adicionar uma detecção de colisão mais completa e robusta, pois no momento a colisão é apenas com os limites da sala
+
+- Fazer um sistema de interação com as exibições, que mostrasse nome e autor ao clicar na exibição
+
 - Expandir a variedade de itens de exibição e as texturas
 
 
@@ -89,3 +109,23 @@ O `Makefile` compila usando `gcc`, linkando `-lGL -lGLU -lglut -lm` do OpenGL e 
 
 
 ## O que cada integrante fez
+
+#### Thiago César
+- Base inicial do projeto e organização da estrutura dos arquivos
+- Sistema de câmera completo (`camera.c`): modo livre em primeira pessoa com WASD e mouse, cálculo dos vetores de direção e perpendicular e alternância de modos com a tecla `T`
+- Detecção de colisão por regiões navegáveis, com teste em cada eixo para ter deslizamento nas paredes
+- Modo tour automático: percurso de 11 waypoints usando splines de Catmull-Rom, alvos de visão por waypoint e transição suave ao mudar alvo de visão.
+- Curvas de Bézier (`curvas.c`): `curva_avaliar()` pela forma polinomial de Bernstein para posicionar a câmera.
+- Sistema de iluminação (`iluminacao.c`): alocação dinâmica dos 8 slots do OpenGL por ambiente, com prioridade para os lustres; configuração de cor, atenuação e abertura de cone dos spots
+- Geometria das fontes de luz: lustres de teto como semiesferas com `GL_EMISSION` e cabo, e spots como uma caixa preta e um disco de luz (para representar uma lâmpada led) feito com `gluDisk`
+- Subdivisão da geometria dos quads em grade 12×12 pra corrigir os artefatos de iluminação por vértice
+- Alternância de tela cheia com F11, preservando o estado da janela para voltar ao modo janela sem bugar
+- Algumas das estatuas e fonte da sala dos quadros
+- `Makefile`
+- Escrita do README
+
+### José Roberto
+- [preencher]
+
+### Vanderley Ferreira
+- [preencher]
