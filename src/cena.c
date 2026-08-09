@@ -3,28 +3,10 @@
 #include "common.h"
 #include "texture.h"
 
-// --- LIMITES FÍSICOS DA NOVA PLANTA ---
-// Sala 1 (Esculturas) - Fica à esquerda
-#define S1_XMIN -25.0f
-#define S1_XMAX -5.0f
-#define S1_ZMIN -10.0f
-#define S1_ZMAX  10.0f
-
-// Corredor - Fica no centro
-#define C_XMIN  -5.0f
-#define C_XMAX   5.0f
-#define C_ZMIN  -3.0f // Mais estreito que as salas
-#define C_ZMAX   3.0f
-
-// Sala 2 (Quadros) - Fica à direita
-#define S2_XMIN  5.0f
-#define S2_XMAX  25.0f
-#define S2_ZMIN -10.0f
-#define S2_ZMAX  10.0f
-
-// --- ALTURAS (PÉ-DIREITO) ---
-#define ALTURA_SALA     7.0f  // Salas bem altas
-#define ALTURA_CORREDOR 4.0f  // Corredor mais baixo
+// divisoes por lado ao desenhar cada superficie. usado pra melhorar a iluminação
+// a luz do opengl 2.1 é calculada por vertice, entao um quad unico nao tem
+// pontos suficientes pra registrar o brilho embaixo das luzes
+#define SUBDIVISOES_QUAD 12
 
 static GLuint texturaPiso = 0;
 static GLuint texturaParede = 0;
@@ -48,12 +30,43 @@ static void desenhar_quad(GLuint textura, float repeticao,
         glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     }
 
-    glBegin(GL_QUADS);
+glBegin(GL_QUADS);
         glNormal3f(nx, ny, nz);
-        glTexCoord2f(0.0f, 0.0f);            glVertex3f(x1, y1, z1);
-        glTexCoord2f(repeticao, 0.0f);       glVertex3f(x2, y2, z2);
-        glTexCoord2f(repeticao, repeticao);  glVertex3f(x3, y3, z3);
-        glTexCoord2f(0.0f, repeticao);       glVertex3f(x4, y4, z4);
+
+        // percorre a superficie numa grade, gerando varios quads menores
+        // u e v vao de 0 a 1 e indicam a posicao relativa dentro do quad original
+        for (int i = 0; i < SUBDIVISOES_QUAD; i++) {
+            for (int j = 0; j < SUBDIVISOES_QUAD; j++) {
+                float u0 = (float)i / SUBDIVISOES_QUAD;
+                float u1 = (float)(i + 1) / SUBDIVISOES_QUAD;
+                float v0 = (float)j / SUBDIVISOES_QUAD;
+                float v1 = (float)(j + 1) / SUBDIVISOES_QUAD;
+
+                // interpolacao bilinear entre os 4 cantos originais
+                // a borda de baixo vai de p1 a p2, e a de cima de p4 a p3
+                float ax = x1 + (x2 - x1) * u0, az = z1 + (z2 - z1) * u0;
+                float ay = y1 + (y2 - y1) * u0;
+                float bx = x4 + (x3 - x4) * u0, bz = z4 + (z3 - z4) * u0;
+                float by = y4 + (y3 - y4) * u0;
+
+                float cx = x1 + (x2 - x1) * u1, cz = z1 + (z2 - z1) * u1;
+                float cy = y1 + (y2 - y1) * u1;
+                float dx = x4 + (x3 - x4) * u1, dz = z4 + (z3 - z4) * u1;
+                float dy = y4 + (y3 - y4) * u1;
+
+                glTexCoord2f(u0 * repeticao, v0 * repeticao);
+                glVertex3f(ax + (bx - ax) * v0, ay + (by - ay) * v0, az + (bz - az) * v0);
+
+                glTexCoord2f(u1 * repeticao, v0 * repeticao);
+                glVertex3f(cx + (dx - cx) * v0, cy + (dy - cy) * v0, cz + (dz - cz) * v0);
+
+                glTexCoord2f(u1 * repeticao, v1 * repeticao);
+                glVertex3f(cx + (dx - cx) * v1, cy + (dy - cy) * v1, cz + (dz - cz) * v1);
+
+                glTexCoord2f(u0 * repeticao, v1 * repeticao);
+                glVertex3f(ax + (bx - ax) * v1, ay + (by - ay) * v1, az + (bz - az) * v1);
+            }
+        }
     glEnd();
 
     if (textura != 0) {

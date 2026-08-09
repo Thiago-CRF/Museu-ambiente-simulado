@@ -15,6 +15,15 @@ static int altura_janela = ALTURA_JANELA;
 // tempo do frame anterior em milissegundos pra calcular o delta tempo dt
 static int tempo_anterior = 0;
 
+// variaveis para controle do modo tela cheia
+static int tela_cheia = 0;
+
+// guarda tamanho e posicao da janela antes de entrar em tela cheia
+static int janela_largura_anterior = LARGURA_JANELA;
+static int janela_altura_anterior = ALTURA_JANELA;
+static int janela_pos_x_anterior = 0;
+static int janela_pos_y_anterior = 0;
+
 // --- FUNÇÃO DE INICIALIZAÇÃO
 void init(void) {
     // cor de fundo da janela ((0.1, 0.1, 0.1, 1.0)cinza escuro)
@@ -77,6 +86,30 @@ void reshape(int w, int h) {
     gluPerspective(45.0, ratio, 0.1, 100.0); 
     
     glMatrixMode(GL_MODELVIEW);  // retorna pro modo de visualização
+
+    // recentraliza o cursor pra camera nao dar um salto quando alternar a janela entre tela cheia
+    glutWarpPointer(largura_janela / 2, altura_janela / 2);
+}
+
+// --- FUNÇÃO PARA TELA CHEIA NO F11
+void alternar_tela_cheia() {
+    // se estiver em modo janela, salva o estado atual da janela pra poder restaurar depois
+    // e então coloca em tela cheia
+    if (!tela_cheia) {
+        janela_largura_anterior = glutGet(GLUT_WINDOW_WIDTH);
+        janela_altura_anterior = glutGet(GLUT_WINDOW_HEIGHT);
+        janela_pos_x_anterior = glutGet(GLUT_WINDOW_X);
+        janela_pos_y_anterior = glutGet(GLUT_WINDOW_Y);
+
+        glutFullScreen();
+        tela_cheia = 1;
+    }
+    else {
+        // restaura o tamanho e a posicao que a janela tinha antes para sair da tela cheia
+        glutReshapeWindow(janela_largura_anterior, janela_altura_anterior);
+        glutPositionWindow(janela_pos_x_anterior, janela_pos_y_anterior);
+        tela_cheia = 0;
+    }
 }
 
 // --- FUNÇÕES DE TECLADO
@@ -96,6 +129,14 @@ void tecla_pressionada(unsigned char key, int x, int y) {
 
 void tecla_solta(unsigned char key, int x, int y) {
     camera_tecla_solta(key);
+}
+
+// lê as teclas especiais 
+void teclas_especiais(int key, int x, int y) {
+    // chama pra alternar tela cheia com F11, usando a constando do glut pois F11 n tem ascii
+    if(key == GLUT_KEY_F11) {
+        alternar_tela_cheia();
+    }
 }
 
 // -- MOVIMENTAÇÃO DO MOUSE
@@ -134,6 +175,7 @@ int main(int argc, char** argv) {
     glutReshapeFunc(reshape);
     glutKeyboardFunc(tecla_pressionada);
     glutKeyboardUpFunc(tecla_solta);
+    glutSpecialFunc(teclas_especiais);
     glutPassiveMotionFunc(movimento_mouse);
 
     glutTimerFunc(16, atualizar, 0);
