@@ -1,6 +1,11 @@
+
+
 # Museu ambiente simulado - Computação gráfica
 Ambiente simulado de um museu feito em OpenGL 2.1 usando C. Onde a câmera percorre o espaço em modo livre (com WASD e mouse), ou um um modo tour automático usando curvas de bézier
 Projeto final da matéria de introdução à copmutação gráfica - UFPB
+
+## Demonstração
+![Demonstração da navegação livre](media/demo.gif)
 
 ## Integrantes do grupo
 - Thiago César
@@ -64,6 +69,8 @@ O `Makefile` compila usando `gcc`, linkando `-lGL -lGLU -lglut -lm` do OpenGL e 
 - Adicionar fontes de luz dinâmicas e exibições dinâmicas, que se movem pela cena
 - Adicionar uma detecção de colisão mais completa e robusta, pois no momento a colisão é apenas com os limites da sala
 - Expandir a variedade de itens de exibição e as texturas
+
+
 
 ## Os elementos das atividades práticas
 | Atividade prática | Onde está implementado | Descrição |
