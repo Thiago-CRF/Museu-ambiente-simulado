@@ -350,3 +350,28 @@ Vetor3 camera_obter_posicao(void) {
     Vetor3 posicao = { cam.x, cam.y, cam.z };
     return posicao;
 }
+
+// desenha o caminho do tour como uma linha fina cinza
+// so aparece no modo tour, pra nao poluir a cena na navegacao livre
+void camera_desenhar_caminho_tour(void) {
+    if (cam.modo != CAMERA_MODO_TOUR)
+        return;
+
+    // a linha nao deve receber luz nem textura, senao fica escura ou pintada
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+
+    glColor3f(0.5f, 0.5f, 0.5f);
+    glLineWidth(1.0f);
+
+    // desenha cada trecho do circuito usando os evaluators do opengl
+    // o translate desce o traçado pra perto do chao, pra linha não ficar na altura da visão
+    glPushMatrix();
+        glTranslatef(0.0f, -(ALTURA_OLHOS - 0.1f), 0.0f);
+        for (int i = 0; i < NUM_TRECHOS; i++) {
+            curva_desenhar(caminho_tour[i], 20);
+        }
+    glPopMatrix();
+
+    glEnable(GL_LIGHTING);
+}
