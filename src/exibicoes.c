@@ -46,7 +46,7 @@ void exponatos_iniciar(void) {
     estatuas[0] = (Estatua){ { -19.0f, 0.0f, -4.0f }, 0.80f, 0.75f, 0.65f, ESTATUA_ESPADA };
     estatuas[1] = (Estatua){ { -11.0f, 0.0f, -4.0f }, 0.70f, 0.55f, 0.35f, ESTATUA_GENERICA };
     estatuas[2] = (Estatua){ { -19.0f, 0.0f,  4.0f }, 0.40f, 0.70f, 0.62f, ESTATUA_LIBERDADE };
-    estatuas[3] = (Estatua){ { -11.0f, 0.0f,  4.0f }, 0.85f, 0.80f, 0.55f, ESTATUA_T_POSE };
+    estatuas[3] = (Estatua){ { -11.0f, 0.0f,  4.0f }, 0.77f, 0.80f, 0.74f, ESTATUA_T_POSE };
 
     // SALA 2 (Direita): Apenas Quadros
     // Centro da sala é em X = 15.0
@@ -317,7 +317,7 @@ void desenhar_estatua_T_pose(float x, float y, float z, float altura_total) {
         glTranslatef(0.0f, alt_pedestal, 0.0f);
         
         // A criação dos cilindros das pernas
-        glColor3f(0.3f, 0.4f, 0.6f); // azul
+        glColor3f(0.52f, 0.52f, 0.50f); // cinza
         glPushMatrix();
             glTranslatef(-raio_cilindro, 0.0f, 0.0f);
             glRotatef(-90.0f, 1.0f, 0.0f, 0.0f); 
@@ -333,7 +333,7 @@ void desenhar_estatua_T_pose(float x, float y, float z, float altura_total) {
         glTranslatef(0.0f, alt_pernas, 0.0f);
 
         // Desenhando o retangulo do tronco
-        glColor3f(0.3f, 0.4f, 0.6f);
+        glColor3f(0.52f, 0.52f, 0.50f);
         glPushMatrix();
             glTranslatef(0.0f, alt_tronco / 2.0f, 0.0f);
             glScalef(largura_retangulo, alt_tronco, diam_cilindro); 
@@ -343,7 +343,7 @@ void desenhar_estatua_T_pose(float x, float y, float z, float altura_total) {
         glTranslatef(0.0f, alt_tronco, 0.0f);
 
         // Desenhando os cilindros dos braços
-        glColor3f(0.3f, 0.4f, 0.6f);
+        glColor3f(0.52f, 0.52f, 0.50f);
         glPushMatrix();
             glTranslatef(largura_retangulo / 2.0f, -raio_braco, 0.0f);
             glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
@@ -358,7 +358,7 @@ void desenhar_estatua_T_pose(float x, float y, float z, float altura_total) {
         glPopMatrix();
 
         // Desenhando a esfere que representa a cabeça
-        glColor3f(0.3f, 0.4f, 0.6f);
+        glColor3f(0.52f, 0.52f, 0.50f);
         glPushMatrix();
             glTranslatef(0.0f, raio_cabeca, 0.0f);
             glutSolidSphere(raio_cabeca, 32, 32);
@@ -535,13 +535,25 @@ void desenhar_objeto(Objetos obj) {
 }
 
 void exponatos_desenhar(void) {
-    // Desenha as estátuas
-    for (int i = 0; i < NUM_ESTATUAS-1; i++) {
-        desenhar_estatua(estatuas[i]);
+    // cada estatua diz qual funcao a desenha, entao adicionar um modelo novo
+    // é so criar a funcao e mais um caso aqui se colocar outra escultura diferente
+    for (int i = 0; i < NUM_ESTATUAS; i++) {
+        switch (estatuas[i].tipo) {
+            case ESTATUA_GENERICA:
+                desenhar_estatua(estatuas[i]);
+                break;
+            case ESTATUA_T_POSE:
+                desenhar_estatua_T_pose(estatuas[i].posicao.x, estatuas[i].posicao.y,
+                                        estatuas[i].posicao.z, 2.0f);
+                break;
+            case ESTATUA_LIBERDADE:
+                desenhar_estatua_liberdade(estatuas[i]);
+                break;
+            case ESTATUA_ESPADA:
+                desenhar_escultura_espada(estatuas[i]);
+                break;
+        }
     }
-
-    // Desenha a estátua especial na última posição
-    desenhar_estatua_T_pose(estatuas[3].posicao.x, estatuas[3].posicao.y, estatuas[3].posicao.z, 2.0f);
 
     // Desenha os quadros enviando um ID de luz progressivo
     for (int i = 0; i < NUM_QUADROS; i++) {
