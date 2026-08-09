@@ -425,11 +425,11 @@ static void desenhar_luminaria(GLenum luzAtual) {
 
         // 7. Lâmpada (Bolinha) e Luz Real (Holofote)
         GLfloat posLuz[] = { 0.0f, 0.0f, 0.2f, 1.0f }; 
-        GLfloat dirLuz[] = { 0.0f, 0.0f, 1.0f };       
+        //GLfloat dirLuz[] = { 0.0f, 0.0f, 1.0f };       
         
         // Define a luz na matriz atual do cone
-        glLightfv(luzAtual, GL_POSITION, posLuz);
-        glLightfv(luzAtual, GL_SPOT_DIRECTION, dirLuz);
+        //glLightfv(luzAtual, GL_POSITION, posLuz);
+        //glLightfv(luzAtual, GL_SPOT_DIRECTION, dirLuz);
 
         // Desenha a bolinha com brilho próprio (Emissão)
         glPushMatrix();
