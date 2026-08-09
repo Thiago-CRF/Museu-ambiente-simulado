@@ -59,7 +59,7 @@ void display(void) {
     // ILUMINAÇÃO, atualiaz a posição das luzes
     iluminacao_atualizar();
 
-       // - AMBIENTE / CHÃO
+    // - AMBIENTE / CHÃO
     cena_desenhar();
 
     // - ACERVO / OBJETOS
@@ -67,6 +67,9 @@ void display(void) {
 
     // DESENHA O CORPO DOS SPOTS DE LUZ
     iluminacao_desenhar_spots();
+
+    // TRAÇADO DO PERCURSO DO TOUR (CURVA DE BÉZIER)
+    camera_desenhar_caminho_tour();
 
     // troca os buffers pra animação
     glutSwapBuffers();

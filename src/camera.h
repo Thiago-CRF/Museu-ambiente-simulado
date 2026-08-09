@@ -40,4 +40,7 @@ void camera_tecla_solta(unsigned char tecla);
 // retorna a posicao atual da camera (usado pra iluminacao)
 Vetor3 camera_obter_posicao(void);
 
+// desenha o traçado do percurso do tour, apenas quando o modo tour esta ativo
+void camera_desenhar_caminho_tour(void);
+
 #endif // MUSEU_CAMERA_H
