@@ -7,7 +7,7 @@ Projeto final da matéria de introdução à copmutação gráfica - UFPB
 ## Demonstração
 ![Demonstração da navegação livre](media/demo.gif)
 
-Modo tour automatico (T):
+Modo tour automatico, usando curvas de bézier:
 
 https://github.com/user-attachments/assets/8ebb57ad-df6e-4977-b4ee-fa430ba52740
 
