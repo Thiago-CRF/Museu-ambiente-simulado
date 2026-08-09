@@ -32,15 +32,15 @@ static void montar_luzes(void) {
     luzes[0] = (LuzMuseu){ { -15.0f, 6.0f, 0.0f }, { 0.0f, -1.0f, 0.0f }, 0, AMBIENTE_SALA1 };
 
     // spots de cada estatua, nas mesmas posicoes x/z usadas em exibicoes.c
-    luzes[1] = (LuzMuseu){ {-19.0f, 5.5f, -4.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_SALA1 };
-    luzes[2] = (LuzMuseu){ {-11.0f, 5.5f, -4.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_SALA1 };
-    luzes[3] = (LuzMuseu){ {-19.0f, 5.5f, 4.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_SALA1 };
-    luzes[4] = (LuzMuseu){ {-11.0f, 5.5f, 4.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_SALA1 };
+    luzes[1] = (LuzMuseu){ {-19.0f, 6.9f, -4.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_SALA1 };
+    luzes[2] = (LuzMuseu){ {-11.0f, 6.9f, -4.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_SALA1 };
+    luzes[3] = (LuzMuseu){ {-19.0f, 6.9f, 4.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_SALA1 };
+    luzes[4] = (LuzMuseu){ {-11.0f, 6.9f, 4.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_SALA1 };
 
     // spots do corredor, mais baixos porque o pe-direito ali e menor
-    luzes[5] = (LuzMuseu){ {-3.3f, 3.6f, 0.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_CORREDOR };
-    luzes[6] = (LuzMuseu){ {0.0f, 3.6f, 0.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_CORREDOR };
-    luzes[7] = (LuzMuseu){ {3.3f, 3.6f, 0.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_CORREDOR };
+    luzes[5] = (LuzMuseu){ {-3.3f, 3.9f, 0.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_CORREDOR };
+    luzes[6] = (LuzMuseu){ {0.0f, 3.9f, 0.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_CORREDOR };
+    luzes[7] = (LuzMuseu){ {3.3f, 3.9f, 0.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_CORREDOR };
 
     // sala 2: por enquanto so o lustre, os spots dos quadros vão ser feitos depois (talvez não sejam individuais)
     luzes[8] = (LuzMuseu){ {15.0f, 6.0f, 0.0f}, {0.0f, -1.0f, 0.0f}, 0, AMBIENTE_SALA2 };
@@ -56,7 +56,7 @@ static void aplicar_luz(GLenum slot, LuzMuseu luz) {
 
     if (luz.e_spot) {
         // luz quente dos holofotes
-        GLfloat difusa[]    = { 1.00f, 0.85f, 0.60f, 1.0f };
+        GLfloat difusa[]    = { 1.20f, 1.0f, 0.70f, 1.0f };
         GLfloat especular[] = { 1.00f, 0.95f, 0.85f, 1.0f };
         GLfloat direcao[]   = { luz.direcao.x, luz.direcao.y, luz.direcao.z };
 
@@ -78,7 +78,7 @@ static void aplicar_luz(GLenum slot, LuzMuseu luz) {
         glLightf(slot, GL_SPOT_CUTOFF, 180.0f);  // 180 desliga o cone e vira pontual
         glLightf(slot, GL_SPOT_EXPONENT, 0.0f);
         glLightf(slot, GL_CONSTANT_ATTENUATION, 1.0f);
-        glLightf(slot, GL_LINEAR_ATTENUATION, 0.02f);
+        glLightf(slot, GL_LINEAR_ATTENUATION, 0.05f);
     }
 
     glEnable(slot);
