@@ -5,6 +5,7 @@
 
 #define NUM_ESTATUAS 4
 #define NUM_QUADROS  7
+#define NUM_OBJETOS  2
 
 typedef struct {
     Vetor3 posicao;
@@ -18,23 +19,29 @@ typedef struct {
     GLuint texturaQuadro;
 } Quadro;
 
+typedef struct {
+    Vetor3 posicao;   // centro do quadro na parede
+    float rotacaoY;   // giro pra encostar o quadro na parede certa
+    float largura, altura;
+    GLuint texturaObjeto;
+} Objetos;
+
 static Estatua estatuas[NUM_ESTATUAS];
 static Quadro quadros[NUM_QUADROS];
+static Objetos objetos[NUM_OBJETOS];
 
 void exponatos_iniciar(void) {
-    // ==========================================
+
     // SALA 1 (Esquerda): Apenas Esculturas
     // Centro da sala é em X = -15.0
-    // ==========================================
     estatuas[0] = (Estatua){ { -19.0f, 0.0f, -4.0f }, 0.80f, 0.75f, 0.65f };
     estatuas[1] = (Estatua){ { -11.0f, 0.0f, -4.0f }, 0.70f, 0.55f, 0.35f };
     estatuas[2] = (Estatua){ { -19.0f, 0.0f,  4.0f }, 0.60f, 0.65f, 0.70f };
     estatuas[3] = (Estatua){ { -11.0f, 0.0f,  4.0f }, 0.85f, 0.80f, 0.55f };
 
-    // ==========================================
     // SALA 2 (Direita): Apenas Quadros
     // Centro da sala é em X = 15.0
-    // ==========================================
+
     // Quadro 1: Parede da esquerda (-X)
     // Como o corredor fica no meio (Z de -3 a 3), vamos colocar este quadro
     // no pilar que fica na parte de trás da parede (Z = -6.5).
@@ -63,6 +70,13 @@ void exponatos_iniciar(void) {
     // Quadro 7: Parede do fundo (-Z)
     quadros[6] = (Quadro){ {  15.0f, 3.0f, -9.9f },   0.0f, 3.0f, 4.36f,
                         textura_carregar("assets/textures/Mona_Lisa.PNG") };
+
+    // Objetos 1, 2:
+    objetos[0] = (Objetos){ {  5.8f, 0.0f,  3.0f },   0.0f, 2.0f, 2.0f,
+                        textura_carregar("assets/textures/planta.png") };
+
+    objetos[1] = (Objetos){ {  5.5f, 0.0f, -3.0f },   0.0f, 1.0f, 1.2f,
+                        textura_carregar("assets/textures/planta.png") };
 }
 
 // desenha um pedestal simples na origem local
@@ -242,6 +256,44 @@ static void desenhar_quadro(Quadro q) {
     glPopMatrix();
 }
 
+void desenhar_objeto(Objetos obj) {
+    float meioL = obj.largura / 2.0f;
+
+    glPushMatrix();
+        glTranslatef(obj.posicao.x, obj.posicao.y, obj.posicao.z);
+
+        // Ativa a transparencia para onde não houver cor
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, obj.texturaObjeto);
+        
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f); // mantem a cor original da textura
+
+        glBegin(GL_QUADS);
+            // Eixo X, frente
+            glNormal3f(0.0f, 0.0f, 1.0f); // Normal apontando para frente
+            glTexCoord2f(0.0f, 0.0f); glVertex3f(-meioL, 0.0f,   0.0f);
+            glTexCoord2f(1.0f, 0.0f); glVertex3f( meioL, 0.0f,   0.0f);
+            glTexCoord2f(1.0f, 1.0f); glVertex3f( meioL, obj.altura, 0.0f);
+            glTexCoord2f(0.0f, 1.0f); glVertex3f(-meioL, obj.altura, 0.0f);
+
+            // Eixo Z, virado para o lado
+            glNormal3f(1.0f, 0.0f, 0.0f); // Normal apontando para o lado
+            glTexCoord2f(0.0f, 0.0f); glVertex3f(0.0f, 0.0f,  -meioL);
+            glTexCoord2f(1.0f, 0.0f); glVertex3f(0.0f, 0.0f,   meioL);
+            glTexCoord2f(1.0f, 1.0f); glVertex3f(0.0f, obj.altura,  meioL);
+            glTexCoord2f(0.0f, 1.0f); glVertex3f(0.0f, obj.altura, -meioL);
+        glEnd();
+
+        // 3. DESATIVA OS RECURSOS (Boa prática para não avacalhar os outros objetos)
+        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_BLEND);
+
+    glPopMatrix();
+}
+
 void exponatos_desenhar(void) {
     for (int i = 0; i < NUM_ESTATUAS-1; i++) {
         desenhar_estatua(estatuas[i]);
@@ -251,5 +303,9 @@ void exponatos_desenhar(void) {
 
     for (int i = 0; i < NUM_QUADROS; i++) {
         desenhar_quadro(quadros[i]);
+    }
+
+    for (int i = 0; i < NUM_OBJETOS; i++) {
+        desenhar_objeto(objetos[i]);
     }
 }
