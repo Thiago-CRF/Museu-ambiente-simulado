@@ -141,6 +141,99 @@ static void desenhar_estatua(Estatua e) {
     glPopMatrix();
 }
 
+// escultura no formato da estatua da liberdade
+// o pedestal que ja tinha termina em y = 1.0, entao o corpo comeca dali
+static void desenhar_estatua_liberdade(Estatua e) {
+    glPushMatrix();
+        glTranslatef(e.posicao.x, e.posicao.y, e.posicao.z);
+
+        desenhar_pedestal();
+
+        glColor3f(e.corR, e.corG, e.corB);
+
+        // tunica: cone com a base no topo do pedestal e a ponta na altura do pescoco
+        glPushMatrix();
+            glTranslatef(0.0f, 1.0f, 0.0f);
+            // o glutSolidCone cresce no eixo z, entao gira pra ele subir no y
+            glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+            glutSolidCone(0.45, 1.35, 20, 4);
+        glPopMatrix();
+
+        // cabeca
+        glPushMatrix();
+            glTranslatef(0.0f, 2.48f, 0.0f);
+            glutSolidSphere(0.17, 16, 16);
+        glPopMatrix();
+
+        // coroa: sete espinhos distribuidos em meia volta em torno da cabeca
+        glPushMatrix();
+            glTranslatef(0.0f, 2.58f, 0.0f);
+            for (int i = 0; i < 7; i++) {
+                glPushMatrix();
+                    glRotatef(i * 30.0f - 90.0f, 0.0f, 1.0f, 0.0f);
+                    glRotatef(-55.0f, 1.0f, 0.0f, 0.0f); // inclina o espinho pra cima
+                    glutSolidCone(0.045, 0.33, 8, 1);
+                glPopMatrix();
+            }
+        glPopMatrix();
+
+        // braco direito pra cima, com uma tocha na ponta
+        glPushMatrix();
+            glTranslatef(0.28f, 2.00f, 0.0f);
+            glRotatef(-14.0f, 0.0f, 0.0f, 1.0f); // afasta o braco do corpo
+
+            glPushMatrix();
+                glTranslatef(0.0f, 0.45f, 0.0f);
+                glScalef(0.13f, 0.9f, 0.13f);
+                glutSolidCube(1.0); // cubo da mão
+            glPopMatrix();
+
+            // a origem local sobe pra ponta do braco
+            glTranslatef(0.0f, 0.95f, 0.0f);
+
+            // taca da tocha
+            glPushMatrix();
+                glRotatef(-90.0f, 1.0f, 0.0f, 0.0f);
+                glutSolidCone(0.13, 0.20, 12, 1);
+            glPopMatrix();
+
+            // chama: emissao faz ela brilhar sozinha, sem depender das luzes
+            GLfloat emissao[] = { 1.0f, 0.80f, 0.35f, 1.0f };
+            glMaterialfv(GL_FRONT, GL_EMISSION, emissao);
+
+            glColor3f(1.0f, 0.85f, 0.45f);
+            glPushMatrix();
+                glTranslatef(0.0f, 0.26f, 0.0f);
+                glScalef(1.0f, 1.7f, 1.0f);
+                glutSolidSphere(0.10, 12, 12);
+            glPopMatrix();
+
+            // reset pra o não glMaterialfv persistir e deixar tudo brilhando depois
+            GLfloat sem_emissao[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+            glMaterialfv(GL_FRONT, GL_EMISSION, sem_emissao);
+        glPopMatrix();
+
+        // volta a cor do corpo, que a chama tinha trocado
+        glColor3f(e.corR, e.corG, e.corB);
+
+        // braco esquerdo dobrado, segurando a tabua junto ao peito
+        glPushMatrix();
+            glTranslatef(-0.30f, 1.90f, 0.10f);
+            glRotatef(-30.0f, 1.0f, 0.0f, 0.0f);
+            glScalef(0.12f, 0.62f, 0.12f);
+            glutSolidCube(1.0);
+        glPopMatrix();
+
+        glPushMatrix();
+            glTranslatef(-0.34f, 1.80f, 0.26f);
+            glRotatef(-18.0f, 1.0f, 0.0f, 0.0f);
+            glScalef(0.30f, 0.46f, 0.07f);
+            glutSolidCube(1.0);
+        glPopMatrix();
+
+    glPopMatrix();
+}
+
 void desenhar_estatua_T_pose(float x, float y, float z, float altura_total) {
     float alt_pedestal = altura_total * 0.05f; // 5%
     float alt_pernas    = altura_total * 0.50f; // 50%
