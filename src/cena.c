@@ -85,7 +85,7 @@ void cena_desenhar(void) {
     // ==========================================
     // 2. TETO (Normais para baixo: 0, -1, 0)
     // ==========================================
-    glColor3f(0.85f, 0.85f, 0.85f); 
+    glColor3f(1.0f, 1.0f, 1.0f); 
     
     // Teto - Sala 1 (Mais alto) - repetindo a textura 8 vezes
     desenhar_quad(texturaTeto, 8.0f, 0.0f, -1.0f, 0.0f,
