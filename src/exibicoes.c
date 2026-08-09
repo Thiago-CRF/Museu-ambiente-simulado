@@ -238,7 +238,7 @@ static void desenhar_luminaria(GLenum luzAtual) {
         glPopMatrix();
 
         // 6. Cúpula (Cone invertido)
-        glRotatef(35.0f, 1.0f, 0.0f, 0.0f); 
+        glRotatef(60.0f, 1.0f, 0.0f, 0.0f); 
         
         glPushMatrix();
             glTranslatef(0.0f, 0.0f, 0.2f);

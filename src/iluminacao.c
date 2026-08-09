@@ -4,9 +4,8 @@
 #include "common.h"
 #include "camera.h"
 
-// AUMENTAMOS O NÚMERO TOTAL PARA 16 LUZES LÓGICAS
-#define NUM_LUZES_MUSEU 16   // 4 spots de estatua + 3 do corredor + 2 lustres + 7 spots quadros
-#define MAX_LUZES_GL 8       // o opengl 2.1 so tem o GL_LIGHT0 ate GL_LIGHT7
+#define NUM_LUZES_MUSEU 9   // 4 spots de estatua + 3 do corredor + 2 lustres
+#define MAX_LUZES_GL 8  // o opengl 2.1 so tem o GL_LIGHT0 ate GL_LIGHT7
 
 // ambientes do museu, usados pra decidir quais luzes ficam acesas
 typedef enum {
@@ -15,7 +14,7 @@ typedef enum {
     AMBIENTE_SALA2
 } Ambiente;
 
-// descricao de uma luz do museu
+// descricao de uma luz do museu, independente do slot do opengl que ela vai ocupar (pra ficar dinamico)
 typedef struct {
     Vetor3 posicao;
     Vetor3 direcao;
@@ -25,6 +24,9 @@ typedef struct {
 
 static LuzMuseu luzes[NUM_LUZES_MUSEU];
 
+// define onde fica cada luz do museu a ordem importa:
+// quando um ambiente nao couber inteiro nos slots restantes,
+// as luzes do fim da lista dele sao as primeiras a ficarem de fora
 static void montar_luzes(void) {
     // sala 1: o lustre vem antes das outras pra nunca ser cortado
     luzes[0] = (LuzMuseu){ { -15.0f, 6.0f, 0.0f }, { 0.0f, -1.0f, 0.0f }, 0, AMBIENTE_SALA1 };
@@ -40,36 +42,20 @@ static void montar_luzes(void) {
     luzes[6] = (LuzMuseu){ {0.0f, 3.6f, 0.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_CORREDOR };
     luzes[7] = (LuzMuseu){ {3.3f, 3.6f, 0.0f}, {0.0f, -1.0f, 0.0f}, 1, AMBIENTE_CORREDOR };
 
-    // sala 2: lustre principal
+    // sala 2: por enquanto so o lustre, os spots dos quadros vão ser feitos depois (talvez não sejam individuais)
     luzes[8] = (LuzMuseu){ {15.0f, 6.0f, 0.0f}, {0.0f, -1.0f, 0.0f}, 0, AMBIENTE_SALA2 };
-
-    // =====================================================================
-    // SPOTS DOS QUADROS (SALA 2) - Cadastrados no sistema do Thiago
-    // =====================================================================
-    // Quadro 0 e 1 (Parede Esquerda, olham para +X)
-    luzes[9]  = (LuzMuseu){ { 5.6f, 5.0f, -6.5f }, { -0.5f, -1.0f, 0.0f }, 1, AMBIENTE_SALA2 };
-    luzes[10] = (LuzMuseu){ { 5.6f, 5.0f,  6.5f }, { -0.5f, -1.0f, 0.0f }, 1, AMBIENTE_SALA2 };
-
-    // Quadros 2, 3 e 4 (Parede da Frente, olham para -Z)
-    luzes[11] = (LuzMuseu){ { 10.0f, 5.0f, 9.4f }, { 0.0f, -1.0f, 0.5f }, 1, AMBIENTE_SALA2 };
-    luzes[12] = (LuzMuseu){ { 15.0f, 5.0f, 9.4f }, { 0.0f, -1.0f, 0.5f }, 1, AMBIENTE_SALA2 };
-    luzes[13] = (LuzMuseu){ { 20.5f, 5.0f, 9.4f }, { 0.0f, -1.0f, 0.5f }, 1, AMBIENTE_SALA2 };
-
-    // Quadro 5 (Parede da Direita, olha para -X)
-    luzes[14] = (LuzMuseu){ { 24.4f, 5.0f, 0.0f }, { 0.5f, -1.0f, 0.0f }, 1, AMBIENTE_SALA2 };
-    
-    // Quadro 6 (Parede do Fundo, olha para +Z)
-    luzes[15] = (LuzMuseu){ { 15.0f, 5.0f, -9.4f }, { 0.0f, -1.0f, -0.5f }, 1, AMBIENTE_SALA2 };
 }
 
 // joga os parametros de uma luz do museu num slot do opengl
+// todos os parametros sao setados aqui e nao no iniciar, porque o mesmo slot
+// pode ser um spot de estatua num frame e um spot de corredor no seguinte
 static void aplicar_luz(GLenum slot, LuzMuseu luz) {
     // o w = 1.0 no fim indica que a luz é posicional, e nao direcional
     GLfloat posicao[] = { luz.posicao.x, luz.posicao.y, luz.posicao.z, 1.0f };
     glLightfv(slot, GL_POSITION, posicao);
 
     if (luz.e_spot) {
-        // luz quente dos holofotes (agora aplica para as luminárias dos quadros também!)
+        // luz quente dos holofotes
         GLfloat difusa[]    = { 1.00f, 0.85f, 0.60f, 1.0f };
         GLfloat especular[] = { 1.00f, 0.95f, 0.85f, 1.0f };
         GLfloat direcao[]   = { luz.direcao.x, luz.direcao.y, luz.direcao.z };
@@ -83,13 +69,13 @@ static void aplicar_luz(GLenum slot, LuzMuseu luz) {
         glLightf(slot, GL_LINEAR_ATTENUATION, 0.08f);
     }
     else {
-        // lustre: luz pontual, fria e mais fraca e espalhada
+        // lustre: luz pontual, fria e mais fraca e espalhada (luz principal da sala)
         GLfloat difusa[]    = { 0.50f, 0.50f, 0.50f, 1.0f };
         GLfloat especular[] = { 0.30f, 0.30f, 0.30f, 1.0f };
 
         glLightfv(slot, GL_DIFFUSE, difusa);
         glLightfv(slot, GL_SPECULAR, especular);
-        glLightf(slot, GL_SPOT_CUTOFF, 180.0f);  
+        glLightf(slot, GL_SPOT_CUTOFF, 180.0f);  // 180 desliga o cone e vira pontual
         glLightf(slot, GL_SPOT_EXPONENT, 0.0f);
         glLightf(slot, GL_CONSTANT_ATTENUATION, 1.0f);
         glLightf(slot, GL_LINEAR_ATTENUATION, 0.02f);
@@ -98,14 +84,15 @@ static void aplicar_luz(GLenum slot, LuzMuseu luz) {
     glEnable(slot);
 }
 
-// descobre em qual ambiente a camera esta, so pelo x
+// descobre em qual ambiente a camera esta, so pelo x (ja que todo o ambiente ta no mesmo eixo x)
 static Ambiente ambiente_da_camera(Vetor3 posicao) {
     if (posicao.x < C_XMIN) return AMBIENTE_SALA1;
     if (posicao.x > C_XMAX) return AMBIENTE_SALA2;
     return AMBIENTE_CORREDOR;
 }
 
-// monta a ordem de prioridade dos ambientes
+// monta a ordem de prioridade dos ambientes: o atual primeiro, depois os vizinhos
+// assim as luzes que da pra ver pela porta continuam acesas se ainda houver slot
 static void ordem_de_prioridade(Ambiente atual, Ambiente ordem[3]) {
     if (atual == AMBIENTE_SALA1) {
         ordem[0] = AMBIENTE_SALA1;
@@ -124,6 +111,8 @@ static void ordem_de_prioridade(Ambiente atual, Ambiente ordem[3]) {
     }
 }
 
+static LuzMuseu luzes[NUM_LUZES_MUSEU];
+
 void iluminacao_iniciar(){
     glEnable(GL_LIGHTING);
 
@@ -131,10 +120,14 @@ void iluminacao_iniciar(){
     glEnable(GL_COLOR_MATERIAL);
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 
+    // brilho especular padrao dos materiais (no momento esta o mesmo brilho pra todos materiais)
+    // mudar isso dentro de exibicoes.c, chamando glMaterialfv individualmente pra cada item de exibição
     GLfloat especular_material[] = { 0.3f, 0.3f, 0.3f, 1.0f };
     glMaterialfv(GL_FRONT, GL_SPECULAR, especular_material);
     glMaterialf(GL_FRONT, GL_SHININESS, 20.0f);
 
+    // luz ambiente global: fica no modelo de iluminacao, e nao numa luz especifica,
+    // pra a cena nao escurecer toda quando os slots trocam de dono entre um ambiente e outro
     GLfloat ambiente_global[] = { 0.20f, 0.19f, 0.18f, 1.0f };
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambiente_global);
 
@@ -142,15 +135,23 @@ void iluminacao_iniciar(){
 }
 
 void iluminacao_atualizar(){
+    // as posições sao definidas todo frame porque depende da matriz modelview
+    // precisa chamar depois de camera_aplicar_visualizacao()
+
+    // pega a posição da camera e define o ambiente atual dela
     Vetor3 posicao_camera = camera_obter_posicao();
     Ambiente amb_atual = ambiente_da_camera(posicao_camera);
 
+    // com base na ordem de ambientes (contando o atual), define a ordem de prioridade das luzes
     Ambiente amb_ordem[3];
     ordem_de_prioridade(amb_atual, amb_ordem);
 
     int slots_usados = 0;
 
-    // 1. Liga os dois lustres primeiro
+
+    // os lustres entram primeiro, independente do ambiente: como o opengl nao
+    // projeta sombras, eles iluminam o museu inteiro e servem de preenchimento
+    // geral, entao deixar um de fora escurece a sala que perdeu o slot
     for (int i = 0; i < NUM_LUZES_MUSEU && slots_usados < MAX_LUZES_GL; i++) {
         if (!luzes[i].e_spot) {
             aplicar_luz(GL_LIGHT0 + slots_usados, luzes[i]);
@@ -158,7 +159,7 @@ void iluminacao_atualizar(){
         }
     }
 
-    // 2. Preenche as 6 vagas restantes com os spots
+    // os spots ocupam o que sobrou, comecando pelo ambiente onde a camera esta
     for (int a = 0; a < 3 && slots_usados < MAX_LUZES_GL; a++) {
         for (int i = 0; i < NUM_LUZES_MUSEU && slots_usados < MAX_LUZES_GL; i++) {
             if (luzes[i].e_spot && luzes[i].ambiente == amb_ordem[a]) {
