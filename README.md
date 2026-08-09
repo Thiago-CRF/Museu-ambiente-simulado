@@ -100,10 +100,10 @@ O `Makefile` compila usando `gcc`, linkando `-lGL -lGLU -lglut -lm` do OpenGL e 
 ## Os elementos das atividades práticas
 | Atividade prática | Onde está implementado | Descrição |
 |---|---|---|
-| Primitivas e cor |  |  |
+| Primitivas e cor | `cena.c` | Piso, paredes e teto das duas salas e do corredor construídos com `GL_QUADS`; cor definida por `glColor3f` e pelos materiais das superfícies. Também aparecem nas estátuas e pedestais (`exibicoes.c`) e nos corpos dos lustres e spots (`iluminacao.c`) |
 | Visualização 3D / hierarquia | `exibicoes.c` (`exponatos_desenhar`) | Itens de exibição montados com transformações hierárquicas (pilha de matrizes) |
 | Visibilidade / z-buffer | `main.c` (`GL_DEPTH_TEST`) | Teste de profundidade garante oclusão correta entre os objetos da cena |
-| Iluminação | `iluminacao.c` | `GL_LIGHT0` configurada em `iluminacao_iniciar()`; posição atualizada a cada frame em `iluminacao_atualizar()` (depende da modelview, por isso é chamada após `camera_aplicar_visualizacao()`); materiais por objeto via `glMaterialfv` em `exibicoes.c` |
+| Iluminação | `iluminacao.c` | 14 fontes de luz (lustres e spots) distribuídas dinamicamente pelos 8 slots do OpenGL com base no ambiente da câmera; spots com cone e atenuação, e materiais por objeto via `glMaterialfv` |
 | Texturas | `texture.c` | Wrapper sobre a `stb_image.h`; usada para aplicar texturas de piso/parede em `cena.c` |
 | Curvas paramétricas | `curvas.c` (`curva_avaliar`) | Curva de Bézier cúbica avaliada em `t ∈ [0,1]`, usada em `camera.c` (`atualizar_modo_tour`) pro deslocamento automático da câmera |
 
