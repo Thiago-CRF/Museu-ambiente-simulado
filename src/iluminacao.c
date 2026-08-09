@@ -7,6 +7,12 @@
 #define NUM_LUZES_MUSEU 9   // 4 spots de estatua + 3 do corredor + 2 lustres
 #define MAX_LUZES_GL 8  // o opengl 2.1 so tem o GL_LIGHT0 ate GL_LIGHT7
 
+// medidas do objeto que representa cada spot (apenas para desenhar)
+// as luzes ficam 0.1 abaixo do teto, entao a caixa preenche essa folga
+#define SPOT_LADO_CAIXA    0.5f // tamanho do quadrado do spot
+#define SPOT_ALTURA_CAIXA  0.12f // altura do quadrado do spot
+#define SPOT_RAIO_LAMPADA  0.16f // raio da lampada do spot
+
 // ambientes do museu, usados pra decidir quais luzes ficam acesas
 typedef enum {
     AMBIENTE_SALA1,
@@ -112,6 +118,52 @@ static void ordem_de_prioridade(Ambiente atual, Ambiente ordem[3]) {
 }
 
 static LuzMuseu luzes[NUM_LUZES_MUSEU];
+
+// desenha o corpo de um spot: uma caixa preta com uma lampada redonda embaixo
+static void desenhar_corpo_spot(Vetor3 posicao) {
+    GLUquadric *q = gluNewQuadric();
+
+    glPushMatrix();
+        glTranslatef(posicao.x, posicao.y, posicao.z);
+
+        // caixa preta do suporte, deslocada pra cima pra encostar no teto
+        glColor3f(0.08f, 0.08f, 0.08f);
+        glPushMatrix();
+            glTranslatef(0.0f, SPOT_ALTURA_CAIXA / 2.0f - 0.02f, 0.0f);
+            glScalef(SPOT_LADO_CAIXA, SPOT_ALTURA_CAIXA, SPOT_LADO_CAIXA);
+            glutSolidCube(1.0);
+        glPopMatrix();
+
+        // lampada é só um disco com emissao, logo abaixo da face de baixo da caixa
+        GLfloat emissao[] = { 1.0f, 0.95f, 0.85f, 1.0f };
+        glMaterialfv(GL_FRONT, GL_EMISSION, emissao);
+
+        glColor3f(1.0f, 1.0f, 1.0f);
+        glPushMatrix();
+            glTranslatef(0.0f, -0.03f, 0.0f);
+            // o gluDisk fica no plano z = 0 com a normal em +z, entao gira pra
+            // essa normal apontar pra baixo e o disco ser visto de baixo
+            glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+            gluDisk(q, 0.0, SPOT_RAIO_LAMPADA, 24, 1);
+        glPopMatrix();
+
+        // reset pois o glMaterialfv persiste e deixaria tudo brilhando depois
+        GLfloat sem_emissao[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        glMaterialfv(GL_FRONT, GL_EMISSION, sem_emissao);
+
+    glPopMatrix();
+
+    gluDeleteQuadric(q);
+}
+
+// desenha o corpo de todos os spots, nas mesmas posicoes das luzes
+void iluminacao_desenhar_spots(void) {
+    for (int i = 0; i < NUM_LUZES_MUSEU; i++) {
+        if (luzes[i].e_spot) {
+            desenhar_corpo_spot(luzes[i].posicao);
+        }
+    }
+}
 
 void iluminacao_iniciar(){
     glEnable(GL_LIGHTING);

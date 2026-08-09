@@ -65,6 +65,9 @@ void display(void) {
     // - ACERVO / OBJETOS
     exponatos_desenhar();
 
+    // DESENHA O CORPO DOS SPOTS DE LUZ
+    iluminacao_desenhar_spots();
+
     // troca os buffers pra animação
     glutSwapBuffers();
 }
