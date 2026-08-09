@@ -1,7 +1,15 @@
 #include <GL/glut.h>
+#include <math.h>
 #include "cena.h"
 #include "common.h"
 #include "texture.h"
+
+// tamanho em unidades de mundo que cada repeticao da textura ocupa
+// como as repeticoes sao calculadas com o tamanho real de cada quad,
+// a textura fica na mesma proporcao em qualquer superficie
+#define ESCALA_TEXTURA_PISO    2.5f
+#define ESCALA_TEXTURA_PAREDE  3.5f
+#define ESCALA_TEXTURA_TETO    2.5f
 
 // divisoes por lado ao desenhar cada superficie. usado pra melhorar a iluminação
 // a luz do opengl 2.1 é calculada por vertice, entao um quad unico nao tem
@@ -24,7 +32,7 @@ void cena_iniciar(void) {
     texturaTeto = textura_carregar("assets/textures/teto.jpg");
 }
 
-static void desenhar_quad(GLuint textura, float repeticao,
+static void desenhar_quad(GLuint textura, float escala,
                           float nx, float ny, float nz,
                           float x1, float y1, float z1,
                           float x2, float y2, float z2,
@@ -35,6 +43,19 @@ static void desenhar_quad(GLuint textura, float repeticao,
         glBindTexture(GL_TEXTURE_2D, textura);
         glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     }
+
+    // mede os dois lados do quad pra saber quantas repeticoes cabem em cada eixo
+    // u segue a borda p1->p2 e v segue a borda p1->p4, iguais a interpolacao abaixo (horizontal e vertical)
+    // para calcular a repetição da textura e ela não ficar muito esticada ou ter que testar manualmente
+    float comp_u = sqrtf((x2 - x1) * (x2 - x1) +
+                         (y2 - y1) * (y2 - y1) +
+                         (z2 - z1) * (z2 - z1));
+    float comp_v = sqrtf((x4 - x1) * (x4 - x1) +
+                         (y4 - y1) * (y4 - y1) +
+                         (z4 - z1) * (z4 - z1));
+
+    float repeticao_u = comp_u / escala;
+    float repeticao_v = comp_v / escala;
 
 glBegin(GL_QUADS);
         glNormal3f(nx, ny, nz);
@@ -60,16 +81,16 @@ glBegin(GL_QUADS);
                 float dx = x4 + (x3 - x4) * u1, dz = z4 + (z3 - z4) * u1;
                 float dy = y4 + (y3 - y4) * u1;
 
-                glTexCoord2f(u0 * repeticao, v0 * repeticao);
+                glTexCoord2f(u0 * repeticao_u, v0 * repeticao_v);
                 glVertex3f(ax + (bx - ax) * v0, ay + (by - ay) * v0, az + (bz - az) * v0);
 
-                glTexCoord2f(u1 * repeticao, v0 * repeticao);
+                glTexCoord2f(u1 * repeticao_u, v0 * repeticao_v);
                 glVertex3f(cx + (dx - cx) * v0, cy + (dy - cy) * v0, cz + (dz - cz) * v0);
 
-                glTexCoord2f(u1 * repeticao, v1 * repeticao);
+                glTexCoord2f(u1 * repeticao_u, v1 * repeticao_v);
                 glVertex3f(cx + (dx - cx) * v1, cy + (dy - cy) * v1, cz + (dz - cz) * v1);
 
-                glTexCoord2f(u0 * repeticao, v1 * repeticao);
+                glTexCoord2f(u0 * repeticao_u, v1 * repeticao_v);
                 glVertex3f(ax + (bx - ax) * v1, ay + (by - ay) * v1, az + (bz - az) * v1);
             }
         }
@@ -135,17 +156,17 @@ void cena_desenhar(void) {
     glColor3f(0.6f, 0.6f, 0.6f);
     
     // Piso - Sala 1
-    desenhar_quad(texturaPiso, 8.0f, 0.0f, 1.0f, 0.0f,
+    desenhar_quad(texturaPiso, ESCALA_TEXTURA_PISO, 0.0f, 1.0f, 0.0f,
                   S1_XMIN, 0.0f, S1_ZMIN,  S1_XMIN, 0.0f, S1_ZMAX,
                   S1_XMAX, 0.0f, S1_ZMAX,  S1_XMAX, 0.0f, S1_ZMIN);
     
     // Piso - Corredor
-    desenhar_quad(texturaPiso, 4.0f, 0.0f, 1.0f, 0.0f,
+    desenhar_quad(texturaPiso, ESCALA_TEXTURA_PISO, 0.0f, 1.0f, 0.0f,
                   C_XMIN, 0.0f, C_ZMIN,  C_XMIN, 0.0f, C_ZMAX,
                   C_XMAX, 0.0f, C_ZMAX,  C_XMAX, 0.0f, C_ZMIN);
 
     // Piso - Sala 2
-    desenhar_quad(texturaPiso, 8.0f, 0.0f, 1.0f, 0.0f,
+    desenhar_quad(texturaPiso, ESCALA_TEXTURA_PISO, 0.0f, 1.0f, 0.0f,
                   S2_XMIN, 0.0f, S2_ZMIN,  S2_XMIN, 0.0f, S2_ZMAX,
                   S2_XMAX, 0.0f, S2_ZMAX,  S2_XMAX, 0.0f, S2_ZMIN);
 
@@ -155,17 +176,17 @@ void cena_desenhar(void) {
     glColor3f(1.0f, 1.0f, 1.0f); 
     
     // Teto - Sala 1 (Mais alto) - repetindo a textura 8 vezes
-    desenhar_quad(texturaTeto, 8.0f, 0.0f, -1.0f, 0.0f,
+    desenhar_quad(texturaTeto, ESCALA_TEXTURA_TETO, 0.0f, -1.0f, 0.0f,
                   S1_XMIN, ALTURA_SALA, S1_ZMIN,  S1_XMAX, ALTURA_SALA, S1_ZMIN,
                   S1_XMAX, ALTURA_SALA, S1_ZMAX,  S1_XMIN, ALTURA_SALA, S1_ZMAX);
 
     // Teto - Corredor (Mais baixo) - repetindo a textura 4 vezes
-    desenhar_quad(texturaTeto, 4.0f, 0.0f, -1.0f, 0.0f,
+    desenhar_quad(texturaTeto, ESCALA_TEXTURA_TETO, 0.0f, -1.0f, 0.0f,
                   C_XMIN, ALTURA_CORREDOR, C_ZMIN,  C_XMAX, ALTURA_CORREDOR, C_ZMIN,
                   C_XMAX, ALTURA_CORREDOR, C_ZMAX,  C_XMIN, ALTURA_CORREDOR, C_ZMAX);
 
     // Teto - Sala 2 (Mais alto) - repetindo a textura 8 vezes
-    desenhar_quad(texturaTeto, 8.0f, 0.0f, -1.0f, 0.0f,
+    desenhar_quad(texturaTeto, ESCALA_TEXTURA_TETO, 0.0f, -1.0f, 0.0f,
                   S2_XMIN, ALTURA_SALA, S2_ZMIN,  S2_XMAX, ALTURA_SALA, S2_ZMIN,
                   S2_XMAX, ALTURA_SALA, S2_ZMAX,  S2_XMIN, ALTURA_SALA, S2_ZMAX);
     // ==========================================
@@ -175,71 +196,71 @@ void cena_desenhar(void) {
 
     // --- PAREDES DA SALA 1 (Esquerda) ---
     // Fundo (-Z)
-    desenhar_quad(texturaParede, 4.0f, 0.0f, 0.0f, 1.0f,
+    desenhar_quad(texturaParede, ESCALA_TEXTURA_PAREDE, 0.0f, 0.0f, 1.0f,
                   S1_XMIN, 0.0f, S1_ZMIN,  S1_XMAX, 0.0f, S1_ZMIN,
                   S1_XMAX, ALTURA_SALA, S1_ZMIN,  S1_XMIN, ALTURA_SALA, S1_ZMIN);
     
     // Frente (+Z)
-    desenhar_quad(texturaParede, 4.0f, 0.0f, 0.0f, -1.0f,
+    desenhar_quad(texturaParede, ESCALA_TEXTURA_PAREDE, 0.0f, 0.0f, -1.0f,
                   S1_XMAX, 0.0f, S1_ZMAX,  S1_XMIN, 0.0f, S1_ZMAX,
                   S1_XMIN, ALTURA_SALA, S1_ZMAX,  S1_XMAX, ALTURA_SALA, S1_ZMAX);
 
     // Esquerda (-X) - Parede fechada
-    desenhar_quad(texturaParede, 4.0f, 1.0f, 0.0f, 0.0f,
+    desenhar_quad(texturaParede, ESCALA_TEXTURA_PAREDE, 1.0f, 0.0f, 0.0f,
                   S1_XMIN, 0.0f, S1_ZMAX,  S1_XMIN, 0.0f, S1_ZMIN,
                   S1_XMIN, ALTURA_SALA, S1_ZMIN,  S1_XMIN, ALTURA_SALA, S1_ZMAX);
 
     // Direita (+X) - Parede com a porta para o corredor
     // 1º Pilar (fundo)
-    desenhar_quad(texturaParede, 2.0f, -1.0f, 0.0f, 0.0f,
+    desenhar_quad(texturaParede, ESCALA_TEXTURA_PAREDE, -1.0f, 0.0f, 0.0f,
                   S1_XMAX, 0.0f, S1_ZMIN,  S1_XMAX, 0.0f, C_ZMIN,
                   S1_XMAX, ALTURA_SALA, C_ZMIN,  S1_XMAX, ALTURA_SALA, S1_ZMIN);
     // 2º Pilar (frente)
-    desenhar_quad(texturaParede, 2.0f, -1.0f, 0.0f, 0.0f,
+    desenhar_quad(texturaParede, ESCALA_TEXTURA_PAREDE, -1.0f, 0.0f, 0.0f,
                   S1_XMAX, 0.0f, C_ZMAX,  S1_XMAX, 0.0f, S1_ZMAX,
                   S1_XMAX, ALTURA_SALA, S1_ZMAX,  S1_XMAX, ALTURA_SALA, C_ZMAX);
     // Verga (parede acima da abertura do corredor)
-    desenhar_quad(texturaParede, 1.0f, -1.0f, 0.0f, 0.0f,
+    desenhar_quad(texturaParede, ESCALA_TEXTURA_PAREDE, -1.0f, 0.0f, 0.0f,
                   S1_XMAX, ALTURA_CORREDOR, C_ZMIN,  S1_XMAX, ALTURA_CORREDOR, C_ZMAX,
                   S1_XMAX, ALTURA_SALA, C_ZMAX,  S1_XMAX, ALTURA_SALA, C_ZMIN);
 
     // --- PAREDES DO CORREDOR ---
     // Fundo (-Z)
-    desenhar_quad(texturaParede, 2.0f, 0.0f, 0.0f, 1.0f,
+    desenhar_quad(texturaParede, ESCALA_TEXTURA_PAREDE, 0.0f, 0.0f, 1.0f,
                   C_XMIN, 0.0f, C_ZMIN,  C_XMAX, 0.0f, C_ZMIN,
                   C_XMAX, ALTURA_CORREDOR, C_ZMIN,  C_XMIN, ALTURA_CORREDOR, C_ZMIN);
     // Frente (+Z)
-    desenhar_quad(texturaParede, 2.0f, 0.0f, 0.0f, -1.0f,
+    desenhar_quad(texturaParede, ESCALA_TEXTURA_PAREDE, 0.0f, 0.0f, -1.0f,
                   C_XMAX, 0.0f, C_ZMAX,  C_XMIN, 0.0f, C_ZMAX,
                   C_XMIN, ALTURA_CORREDOR, C_ZMAX,  C_XMAX, ALTURA_CORREDOR, C_ZMAX);
 
     // --- PAREDES DA SALA 2 (Direita) ---
     // Fundo (-Z)
-    desenhar_quad(texturaParede, 4.0f, 0.0f, 0.0f, 1.0f,
+    desenhar_quad(texturaParede, ESCALA_TEXTURA_PAREDE, 0.0f, 0.0f, 1.0f,
                   S2_XMIN, 0.0f, S2_ZMIN,  S2_XMAX, 0.0f, S2_ZMIN,
                   S2_XMAX, ALTURA_SALA, S2_ZMIN,  S2_XMIN, ALTURA_SALA, S2_ZMIN);
 
     // Frente (+Z)
-    desenhar_quad(texturaParede, 4.0f, 0.0f, 0.0f, -1.0f,
+    desenhar_quad(texturaParede, ESCALA_TEXTURA_PAREDE, 0.0f, 0.0f, -1.0f,
                   S2_XMAX, 0.0f, S2_ZMAX,  S2_XMIN, 0.0f, S2_ZMAX,
                   S2_XMIN, ALTURA_SALA, S2_ZMAX,  S2_XMAX, ALTURA_SALA, S2_ZMAX);
 
     // Direita (+X) - Parede fechada
-    desenhar_quad(texturaParede, 4.0f, -1.0f, 0.0f, 0.0f,
+    desenhar_quad(texturaParede, ESCALA_TEXTURA_PAREDE, -1.0f, 0.0f, 0.0f,
                   S2_XMAX, 0.0f, S2_ZMIN,  S2_XMAX, 0.0f, S2_ZMAX,
                   S2_XMAX, ALTURA_SALA, S2_ZMAX,  S2_XMAX, ALTURA_SALA, S2_ZMIN);
 
     // Esquerda (-X) - Parede com a porta para o corredor
     // 1º Pilar (frente)
-    desenhar_quad(texturaParede, 2.0f, 1.0f, 0.0f, 0.0f,
+    desenhar_quad(texturaParede, ESCALA_TEXTURA_PAREDE, 1.0f, 0.0f, 0.0f,
                   S2_XMIN, 0.0f, S2_ZMAX,  S2_XMIN, 0.0f, C_ZMAX,
                   S2_XMIN, ALTURA_SALA, C_ZMAX,  S2_XMIN, ALTURA_SALA, S2_ZMAX);
     // 2º Pilar (fundo)
-    desenhar_quad(texturaParede, 2.0f, 1.0f, 0.0f, 0.0f,
+    desenhar_quad(texturaParede, ESCALA_TEXTURA_PAREDE, 1.0f, 0.0f, 0.0f,
                   S2_XMIN, 0.0f, C_ZMIN,  S2_XMIN, 0.0f, S2_ZMIN,
                   S2_XMIN, ALTURA_SALA, S2_ZMIN,  S2_XMIN, ALTURA_SALA, C_ZMIN);
     // Verga (parede acima da abertura do corredor)
-    desenhar_quad(texturaParede, 1.0f, 1.0f, 0.0f, 0.0f,
+    desenhar_quad(texturaParede, ESCALA_TEXTURA_PAREDE, 1.0f, 0.0f, 0.0f,
                   S2_XMIN, ALTURA_CORREDOR, C_ZMAX,  S2_XMIN, ALTURA_CORREDOR, C_ZMIN,
                   S2_XMIN, ALTURA_SALA, C_ZMIN,  S2_XMIN, ALTURA_SALA, C_ZMAX);
 

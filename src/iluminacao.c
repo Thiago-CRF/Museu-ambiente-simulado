@@ -86,15 +86,15 @@ static void aplicar_luz(GLenum slot, LuzMuseu luz) {
     }
     else {
         // lustre: luz pontual, fria e mais fraca e espalhada (luz principal da sala)
-        GLfloat difusa[]    = { 0.50f, 0.50f, 0.50f, 1.0f };
+        GLfloat difusa[]    = { 0.85f, 0.78f, 0.68f, 1.0f };
         GLfloat especular[] = { 0.30f, 0.30f, 0.30f, 1.0f };
 
-        glLightfv(slot, GL_DIFFUSE, difusa);
+        glLightfv(slot, GL_DIFFUSE, difusa);    // força e cor da luz
         glLightfv(slot, GL_SPECULAR, especular);
         glLightf(slot, GL_SPOT_CUTOFF, 180.0f);  // 180 desliga o cone e vira pontual
         glLightf(slot, GL_SPOT_EXPONENT, 0.0f);
         glLightf(slot, GL_CONSTANT_ATTENUATION, 1.0f);
-        glLightf(slot, GL_LINEAR_ATTENUATION, 0.05f);
+        glLightf(slot, GL_LINEAR_ATTENUATION, 0.05f);   // alcance da luz
     }
 
     glEnable(slot);
