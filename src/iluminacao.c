@@ -117,8 +117,6 @@ static void ordem_de_prioridade(Ambiente atual, Ambiente ordem[3]) {
     }
 }
 
-static LuzMuseu luzes[NUM_LUZES_MUSEU];
-
 // desenha o corpo de um spot: uma caixa preta com uma lampada redonda embaixo
 static void desenhar_corpo_spot(Vetor3 posicao) {
     GLUquadric *q = gluNewQuadric();
@@ -219,5 +217,10 @@ void iluminacao_atualizar(){
                 slots_usados++;
             }
         }
+    }
+
+    // desliga os slots que sobraram, senao ficam acesos com a luz do frame anterior
+    for (int s = slots_usados; s < MAX_LUZES_GL; s++) {
+        glDisable(GL_LIGHT0 + s);
     }
 }
