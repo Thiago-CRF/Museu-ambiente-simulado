@@ -128,4 +128,10 @@ O `Makefile` compila usando `gcc`, linkando `-lGL -lGLU -lglut -lm` do OpenGL e 
 - [preencher]
 
 ### Vanderley Ferreira
-- [preencher]
+- Geometria das salas do museu (`cena.c`): Posicionamento das dimensões do teto, piso e paredes , garantindo a delimitação correta para o implementamento do sistema de colisão da câmera.
+- Criação do formato de duas salas e um corredor.
+- Gestão do Acervo (`exibicoes.c`): Posicionamento dos quadros com suas respectivas molduras nas paredes da Sala1 e as estátuas na Sala2 .
+- Modelagem Hierárquica  Implementação das 4 estátuas originais da Sala 2 usando matrizes encadeadas (`glPushMatrix` e `glPopMatrix`).
+- Modelagem da Luminária Pixar: Construção de braços articulados na parede acima de cada quadro, utilizando rotações hierárquicas em múltiplos eixos para posicionar a base, cotovelos e a cúpula cônica voltada para as pinturas.
+- Efeito Visual de Lâmpadas: Aplicação da propriedade de material `GL_EMISSION` na geometria esférica dentro das luminárias, garantindo o brilho físico acoplado ao `GL_SPOT_DIRECTION` configurado no motor de luzes.
+- Renderização de Texturas de Teto e Piso.
