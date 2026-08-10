@@ -125,7 +125,11 @@ O `Makefile` compila usando `gcc`, linkando `-lGL -lGLU -lglut -lm` do OpenGL e 
 - Escrita do README
 
 ### José Roberto
-- [preencher]
+- Carregamento de Texturas (texture.c): Implementação do suporte a imagens usando a biblioteca stb_image.h.
+- Renderização de Quadros (exibicoes.c): Mapeamento de texturas e ajuste proporcional das geometrias para evitar distorções nas pinturas.
+- Técnica de Billboarding: Aplicação de cross-quads com textura para simulação de objetos/plantas 3D com volumetria.
+- Posicionamento e alocação dos objetos de vegetação pela cena.
+- Modelagem: Estruturação e modelagem hierárquica da estátua em T-Pose.
 
 ### Vanderley Ferreira
 - Geometria das salas do museu (`cena.c`): Posicionamento das dimensões do teto, piso e paredes , garantindo a delimitação correta para o implementamento do sistema de colisão da câmera.
